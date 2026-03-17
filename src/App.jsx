@@ -1,27 +1,28 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Customers from "./pages/Customers";
-import FoodData from "./pages/FoodData";
 import Layout from "./components/Layout/Layout";
-import KitchenLayout from "./components/Layout/KitchenLayout";
+import KitchenLayout from './components/Layout/KitchenLayout'; // COMMENT
 
 // Kitchen pages
-import KitchenDashboard from "./pages/kitchen/KitchenDashboard";
+import KitchenDashboard from './pages/kitchen/KitchenDashboard'; // COMMENT
 
+// Admin/Main pages
 import Dashboard from "./pages/Dashboard";
+import Customers from "./pages/Customers";
+import FoodData from "./pages/FoodData";
 
 function App() {
     return (
         <Router>
             <Routes>
-                {/* Admin routes - dùng Layout cũ */}
+                {/* Admin routes */}
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Dashboard />} />
                     <Route path="customers" element={<Customers />} />
                     <Route path="food-data" element={<FoodData />} />
                 </Route>
 
-                {/* Kitchen routes - dùng KitchenLayout riêng */}
+                {/* Tạm thời comment kitchen routes  */}
                 <Route path="/kitchen" element={<KitchenLayout />}>
                     <Route index element={<KitchenDashboard />} />
                 </Route>

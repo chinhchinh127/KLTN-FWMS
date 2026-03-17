@@ -1,23 +1,47 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import {
+    LayoutDashboard,
+    Package,
+    BarChart3,
+    MessageSquare,
+    Settings,
+    LogOut,
+    ChevronDown,
+    ChevronRight,
+} from "lucide-react";
 import logo from "../../assets/logo.svg";
 
 const KitchenSidebar = () => {
+    const location = useLocation();
+    const [openMenus, setOpenMenus] = useState({
+        kitchen: true,
+    });
+
+    const toggleMenu = (menu) => {
+        setOpenMenus((prev) => ({
+            ...prev,
+            [menu]: !prev[menu],
+        }));
+    };
+
+    const isKitchenActive = location.pathname.includes("/kitchen");
+
     return (
-        <div className="w-64 bg-white h-screen fixed left-0 top-0 border-r border-gray-200 flex flex-col">
+        <div className="w-80 bg-white h-screen fixed left-0 top-0 border-r border-gray-200 flex flex-col">
             {/* Logo */}
-            <div className="px-5 py-6 border-b border-gray-200">
-                <div className="flex items-center gap-3">
+            <div className="px-4 py-5 border-b border-gray-200">
+                <div className="flex items-center gap-2">
                     <img
                         src={logo}
                         alt="FWMS Logo"
                         className="w-8 h-8 object-contain"
                     />
                     <div>
-                        <h1 className="text-lg font-bold text-[#10BC5D]">
+                        <h1 className="text-xl font-bold text-[#10BC5D] leading-tight">
                             FWMS
                         </h1>
-                        <p className="text-[10px] text-[#8B8B8B]">
+                        <p className="text-[10px] text-[#8B8B8B] tracking-wider">
                             KITCHEN STAFF
                         </p>
                     </div>
@@ -25,60 +49,89 @@ const KitchenSidebar = () => {
             </div>
 
             {/* Menu */}
-            <div className="flex-1 overflow-y-auto py-4 px-3">
-                {/* Dashboard - Mặc định active */}
+            <div className="flex-1 overflow-y-auto scrollbar-hide py-4 px-3">
+                {/* Dashboard */}
                 <NavLink
                     to="/kitchen"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 rounded-xl mb-1 transition-colors ${
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
                             isActive
                                 ? "bg-[#10BC5D] text-white"
                                 : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
-                    <span className="material-symbols-outlined text-xl">
-                        dashboard
-                    </span>
+                    <LayoutDashboard size={18} />
                     <span className="text-sm font-medium">Bảng điều khiển</span>
                 </NavLink>
 
-                {/* Các menu khác nhưng để tạm thời chưa dùng đến */}
+                {/* Kho hàng */}
                 <NavLink
                     to="/kitchen/inventory"
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl mb-1 text-[#8B8B8B] cursor-not-allowed opacity-50"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
+                            isActive
+                                ? "bg-[#10BC5D] text-white"
+                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        }`
+                    }
                 >
-                    <span className="material-symbols-outlined text-xl">
-                        inventory
-                    </span>
-                    <span className="text-sm">Kho hàng</span>
+                    <Package size={18} />
+                    <span className="text-sm font-medium">Kho hàng</span>
                 </NavLink>
 
+                {/* Báo cáo lãng phí */}
                 <NavLink
-                    to="/kitchen/reports"
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl mb-1 text-[#8B8B8B] cursor-not-allowed opacity-50"
+                    to="/kitchen/waste-report"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
+                            isActive
+                                ? "bg-[#10BC5D] text-white"
+                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        }`
+                    }
                 >
-                    <span className="material-symbols-outlined text-xl">
-                        analytics
+                    <BarChart3 size={18} />
+                    <span className="text-sm font-medium">
+                        Báo cáo lãng phí
                     </span>
-                    <span className="text-sm">Báo cáo</span>
                 </NavLink>
 
+                {/* Tin nhắn */}
                 <NavLink
                     to="/kitchen/messages"
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl mb-1 text-[#8B8B8B] cursor-not-allowed opacity-50"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
+                            isActive
+                                ? "bg-[#10BC5D] text-white"
+                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        }`
+                    }
                 >
-                    <span className="material-symbols-outlined text-xl">
-                        message
-                    </span>
-                    <span className="text-sm">Tin nhắn</span>
+                    <MessageSquare size={18} />
+                    <span className="text-sm font-medium">Tin nhắn</span>
+                </NavLink>
+
+                {/* Cài đặt */}
+                <NavLink
+                    to="/kitchen/settings"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
+                            isActive
+                                ? "bg-[#10BC5D] text-white"
+                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        }`
+                    }
+                >
+                    <Settings size={18} />
+                    <span className="text-sm font-medium">Cài đặt</span>
                 </NavLink>
             </div>
 
-            {/* User Info & Logout */}
+            {/* User Info - Cố định dưới cùng */}
             <div className="px-3 py-4 border-t border-gray-200">
                 <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-full bg-[#10BC5D] flex items-center justify-center text-white text-xs font-bold">
+                    <div className="w-8 h-8 rounded-full bg-[#10BC5D] flex items-center justify-center text-white text-sm font-bold">
                         NV
                     </div>
                     <div>
@@ -90,10 +143,8 @@ const KitchenSidebar = () => {
                         </p>
                     </div>
                 </div>
-                <button className="flex items-center gap-2 text-[#8B8B8B] hover:text-[#141C21] w-full px-3 py-2 rounded-lg hover:bg-gray-100 text-xs">
-                    <span className="material-symbols-outlined text-sm">
-                        logout
-                    </span>
+                <button className="flex items-center gap-2 text-[#8B8B8B] hover:text-[#141C21] w-full px-3 py-1.5 rounded-lg hover:bg-gray-100 text-xs">
+                    <LogOut size={14} />
                     <span>Đăng xuất</span>
                 </button>
             </div>
