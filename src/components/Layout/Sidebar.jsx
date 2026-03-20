@@ -202,7 +202,7 @@ const Sidebar = () => {
                 </NavLink>
 
                 <NavLink
-                    to="/waste-history"
+                    to="/app/waste-history"
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
                             isActive
@@ -227,7 +227,7 @@ const Sidebar = () => {
                         }`
                     }
                 >
-                    <History size={18} />
+                    <BarChart3 size={18} />
                     <span className="text-sm font-medium">
                         Thống kê doanh thu
                     </span>

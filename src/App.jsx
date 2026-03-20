@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Revenue from "./pages/Revenue";
 import PrivateRoute from "./components/PrivateRoute";
+import WasteHistory from "./pages/WasteHistory";
 function App() {
     return (
         <Router>
@@ -31,6 +32,7 @@ function App() {
                     <Route path="customers" element={<Customers />} />
                     <Route path="food-data" element={<FoodData />} />
                     <Route path="revenue" element={<Revenue />} />
+                    <Route path="waste-history" element={<WasteHistory />} />
                 </Route>
 
                 {/* Tạm thời comment kitchen routes  */}
