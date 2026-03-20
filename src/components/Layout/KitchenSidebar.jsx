@@ -28,7 +28,7 @@ const KitchenSidebar = () => {
     const isKitchenActive = location.pathname.includes("/kitchen");
 
     return (
-        <div className="w-80 bg-white h-screen fixed left-0 top-0 border-r border-gray-200 flex flex-col">
+        <div className="w-[280px] bg-white h-screen border-r border-gray-200 flex flex-col flex-shrink-0">
             {/* Logo */}
             <div className="px-4 py-5 border-b border-gray-200">
                 <div className="flex items-center gap-2">

@@ -56,7 +56,7 @@ const Sidebar = () => {
             <div className="flex-1 overflow-y-auto scrollbar-hide py-4 px-3">
                 {/* Dashboard */}
                 <NavLink
-                    to="/"
+                    to="/app"
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
                             isActive
@@ -109,7 +109,7 @@ const Sidebar = () => {
                     {openMenus.consumption && (
                         <div className="ml-6 mt-1 pl-3 border-l-2 border-gray-200">
                             <NavLink
-                                to="/customers"
+                                to="/app/customers"
                                 className={({ isActive }) =>
                                     `flex items-center gap-3 px-3 py-2 rounded-lg mb-1 transition-colors ${
                                         isActive
@@ -123,7 +123,7 @@ const Sidebar = () => {
                                 </span>
                             </NavLink>
                             <NavLink
-                                to="/food-data"
+                                to="/app/food-data"
                                 className={({ isActive }) =>
                                     `flex items-center gap-3 px-3 py-2 rounded-lg mb-1 transition-colors ${
                                         isActive
@@ -140,7 +140,7 @@ const Sidebar = () => {
 
                 {/* Các menu khác */}
                 <NavLink
-                    to="/accounts"
+                    to="/app/accounts"
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
                             isActive
@@ -202,7 +202,7 @@ const Sidebar = () => {
                 </NavLink>
 
                 <NavLink
-                    to="/waste-history"
+                    to="/app/waste-history"
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
                             isActive
@@ -216,6 +216,22 @@ const Sidebar = () => {
                         Lịch sử lãng phí
                     </span>
                 </NavLink>
+      {/* thống kê doanh thu */}
+                 <NavLink
+                    to="/app/revenue"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
+                            isActive
+                                ? "bg-[#10BC5D] text-white"
+                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        }`
+                    }
+                >
+                    <BarChart3 size={18} />
+                    <span className="text-sm font-medium">
+                        Thống kê doanh thu
+                    </span>
+                </NavLink> 
             </div>
 
             {/* User Info - Cố định dưới cùng */}
