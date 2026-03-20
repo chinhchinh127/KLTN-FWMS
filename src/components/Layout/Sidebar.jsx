@@ -140,7 +140,7 @@ const Sidebar = () => {
 
                 {/* Các menu khác */}
                 <NavLink
-                    to="/accounts"
+                    to="/app/accounts"
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
                             isActive
