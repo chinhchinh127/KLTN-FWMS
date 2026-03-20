@@ -10,16 +10,27 @@ import KitchenDashboard from './pages/kitchen/KitchenDashboard'; // COMMENT
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
 import FoodData from "./pages/FoodData";
-
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Revenue from "./pages/Revenue";
+import PrivateRoute from "./components/PrivateRoute";
 function App() {
     return (
         <Router>
             <Routes>
                 {/* Admin routes */}
-                <Route path="/" element={<Layout />}>
+                  <Route path="/" element={<Login />} />
+                   <Route path="/register" element={<Register />} />
+                <Route path="/app" element={
+                        <PrivateRoute>
+                            <Layout />
+                        </PrivateRoute>
+                    }
+                >
                     <Route index element={<Dashboard />} />
                     <Route path="customers" element={<Customers />} />
                     <Route path="food-data" element={<FoodData />} />
+                    <Route path="revenue" element={<Revenue />} />
                 </Route>
 
                 {/* Tạm thời comment kitchen routes  */}
