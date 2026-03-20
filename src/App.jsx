@@ -26,6 +26,8 @@ function App() {
                 <Route path="/kitchen" element={<KitchenLayout />}>
                     <Route index element={<KitchenDashboard />} />
                 </Route>
+
+                {/* Manager Routes */}
             </Routes>
         </Router>
     );
