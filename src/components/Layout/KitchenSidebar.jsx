@@ -9,6 +9,7 @@ import {
     LogOut,
     ChevronDown,
     ChevronRight,
+    PlusCircle,
 } from "lucide-react";
 import logo from "../../assets/logo.svg";
 
@@ -95,6 +96,21 @@ const KitchenSidebar = () => {
                     <span className="text-sm font-medium">
                         Báo cáo lãng phí
                     </span>
+                </NavLink>
+
+                {/* Món dư */}
+                <NavLink
+                    to="/kitchen/surplus-dishes"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
+                            isActive
+                                ? "bg-[#10BC5D] text-white"
+                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        }`
+                    }
+                >
+                    <PlusCircle size={18} />
+                    <span className="text-sm font-medium">Món dư</span>
                 </NavLink>
 
                 {/* Tin nhắn */}
