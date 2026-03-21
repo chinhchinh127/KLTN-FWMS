@@ -136,6 +136,14 @@ const SurplusDishes = () => {
         setQuantity(dish.waste);
     };
 
+    const handleRowClick = (dish) => {
+        // Chỉ cho phép đổi món nếu đã có món đang được chọn
+        if (selectedDish) {
+            setSelectedDish(dish);
+            setQuantity(dish.served);
+        }
+    };
+
     const handleCloseDetail = () => {
         setSelectedDish(null);
     };
@@ -219,6 +227,7 @@ const SurplusDishes = () => {
                                         ? "bg-green-50"
                                         : ""
                                 }`}
+                                onClick={() => handleRowClick(dish)}
                             >
                                 <td className="px-5 py-4 text-sm font-bold text-[#10bc5d]">
                                     {dish.id}
