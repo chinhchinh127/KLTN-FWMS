@@ -180,7 +180,7 @@ const Manager_Account_Staff = () => {
                                             />
                                             <button
                                                 onClick={() =>
-                                                    setVisibility_password(true)
+                                                    setVisibility_password(!visibility_password)
                                                 }
                                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-text hover:text-primary transition-colors"
                                                 type="button"

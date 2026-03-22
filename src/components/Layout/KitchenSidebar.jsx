@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
     Package,
@@ -15,6 +15,7 @@ import logo from "../../assets/logo.svg";
 
 const KitchenSidebar = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const [openMenus, setOpenMenus] = useState({
         kitchen: true,
     });
@@ -25,6 +26,11 @@ const KitchenSidebar = () => {
             [menu]: !prev[menu],
         }));
     };
+
+    const logout = () => {
+        localStorage.removeItem("token");
+        navigate("/");
+    }
 
     const isKitchenActive = location.pathname.includes("/kitchen");
 
@@ -55,10 +61,9 @@ const KitchenSidebar = () => {
                 <NavLink
                     to="/kitchen"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -70,10 +75,9 @@ const KitchenSidebar = () => {
                 <NavLink
                     to="/kitchen/inventory"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -85,10 +89,9 @@ const KitchenSidebar = () => {
                 <NavLink
                     to="/kitchen/waste-report"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -102,10 +105,9 @@ const KitchenSidebar = () => {
                 <NavLink
                     to="/kitchen/surplus-dishes"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -117,10 +119,9 @@ const KitchenSidebar = () => {
                 <NavLink
                     to="/kitchen/messages"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -132,10 +133,9 @@ const KitchenSidebar = () => {
                 <NavLink
                     to="/kitchen/settings"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -159,7 +159,7 @@ const KitchenSidebar = () => {
                         </p>
                     </div>
                 </div>
-                <button className="flex items-center gap-2 text-[#8B8B8B] hover:text-[#141C21] w-full px-3 py-1.5 rounded-lg hover:bg-gray-100 text-xs">
+                <button onClick={logout} className="flex items-center gap-2 text-[#8B8B8B] hover:text-[#141C21] w-full px-3 py-1.5 rounded-lg hover:bg-gray-100 text-xs">
                     <LogOut size={14} />
                     <span>Đăng xuất</span>
                 </button>
