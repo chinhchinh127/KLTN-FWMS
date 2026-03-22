@@ -3,9 +3,17 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
     plugins: [react()],
+    base: "/KLTN-FWMS/",
     server: {
-        port: 3000,
-        open: true,
+        proxy: {
+            "/api": {
+                target: "https://wasteless-ai.onrender.com",
+                changeOrigin: true,
+                secure: false,
+            },
+        },
+        // port: 3000,
+        // open: true,
     },
     // Thêm cấu hình này để hỗ trợ JSX trong file .js
     esbuild: {
