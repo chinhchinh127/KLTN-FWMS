@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import Logo from "../assets/Logo.svg";
 
 function Login() {
     const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +41,7 @@ function Login() {
             if(decode.role == "Manager"){
                 navigate("/kitchen");
             }else{
-                navigate("/kitchen");
+                navigate("/app");
             }
             
 
@@ -55,10 +56,16 @@ function Login() {
 
             {/* Header */}
             <div className="flex justify-between items-center px-4 py-2 bg-white shadow-sm">
-                <h1 className="font-semibold text-gray-700 text-lg">
-                    🍃 Food Waste
-                </h1>
-
+                <div className="flex justify-between items-center px-4 py-2 bg-white shadow-sm">
+                    <h1 className="flex items-center gap-2 font-semibold text-lg text-green-600">
+                        <img
+                            src={Logo}
+                            alt="logo"
+                            className="w-6 h-6 object-contain"
+                        />
+                        FWMS
+                    </h1>
+                </div>
                 <p className="text-sm text-gray-500">
                     Chưa có tài khoản?{" "}
                     <Link to="/register" className="text-green-600 font-medium hover:underline">
