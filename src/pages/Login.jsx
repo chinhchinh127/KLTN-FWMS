@@ -41,7 +41,7 @@ function Login() {
             if(decode.role == "Manager"){
                 navigate("/app");
             }else{
-                navigate("/app");
+                navigate("/kitchen");
             }
             
 
