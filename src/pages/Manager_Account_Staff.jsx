@@ -159,7 +159,7 @@ const Manager_Account_Staff = () => {
                                         </label>
                                         <input
                                             className="form-input w-full rounded-lg border-primary/20 bg-background-light px-4 py-3 text-secondary-text focus:border-primary focus:ring-primary/20 font-nunito"
-                                            placeholder="123 Đường Nguyễn Huệ, Quận 1, TP.HCM"
+                                            placeholder="129 Hoàng Minh Thảo, HKN, Liên Chiểu, Đà Nẵng"
                                             type="text"
                                         />
                                     </div>

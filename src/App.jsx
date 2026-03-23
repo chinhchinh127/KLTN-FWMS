@@ -17,6 +17,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import WasteHistory from "./pages/WasteHistory";
 import Manager_Account_Staff from "./pages/Manager_Account_Staff";
 import SurplusDishes from "./pages/kitchen/SurplusDishes";
+import KitchenRoute from "./components/KitchenRoute";
 
 function App() {
     return (
@@ -47,7 +48,12 @@ function App() {
                 </Route>
 
                 {/* Tạm thời comment kitchen routes  */}
-                <Route path="/kitchen" element={<KitchenLayout />}>
+                <Route path="/kitchen"
+                    element={
+                        <KitchenRoute>
+                            <KitchenLayout/>
+                        </KitchenRoute>
+                    }>
                     <Route index element={<KitchenDashboard />} />
                     <Route path="surplus-dishes" element={<SurplusDishes />} />
                 </Route>
