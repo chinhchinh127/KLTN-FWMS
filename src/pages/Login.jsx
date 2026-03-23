@@ -38,7 +38,7 @@ function Login() {
             alert("Đăng nhập thành công");
 
             if(decode.role == "Manager"){
-                navigate("/kitchen");
+                navigate("/app");
             }else{
                 navigate("/kitchen");
             }
