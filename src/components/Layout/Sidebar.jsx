@@ -12,7 +12,7 @@ import {
     ChevronDown,
     ChevronRight,
 } from "lucide-react";
-import logo from "../../assets/logo.svg";
+import logo from "../../assets/Logo.svg";
 
 const Sidebar = () => {
     const location = useLocation();
@@ -222,8 +222,8 @@ const Sidebar = () => {
                         Lịch sử lãng phí
                     </span>
                 </NavLink>
-      {/* thống kê doanh thu */}
-                 <NavLink
+                {/* thống kê doanh thu */}
+                <NavLink
                     to="/app/revenue"
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
@@ -237,7 +237,7 @@ const Sidebar = () => {
                     <span className="text-sm font-medium">
                         Thống kê doanh thu
                     </span>
-                </NavLink> 
+                </NavLink>
             </div>
 
             {/* User Info - Cố định dưới cùng */}
