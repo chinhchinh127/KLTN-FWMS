@@ -17,6 +17,10 @@ import PrivateRoute from "./components/PrivateRoute";
 import WasteHistory from "./pages/WasteHistory";
 import Manager_Account_Staff from "./pages/Manager_Account_Staff";
 import SurplusDishes from "./pages/kitchen/SurplusDishes";
+import SurplusReport from "./pages/kitchen/reports/SurplusReport";
+import RevenueReport from "./pages/kitchen/reports/RevenueReport";
+import WasteReport from "./pages/kitchen/reports/WasteReport";
+import ReportExport from "./pages/kitchen/ReportExport";
 
 function App() {
     return (
@@ -50,6 +54,21 @@ function App() {
                 <Route path="/kitchen" element={<KitchenLayout />}>
                     <Route index element={<KitchenDashboard />} />
                     <Route path="surplus-dishes" element={<SurplusDishes />} />
+
+                    {/*  Các route báo cáo mới */}
+                    <Route path="report/surplus" element={<SurplusReport />} />
+                    <Route path="report/revenue" element={<RevenueReport />} />
+                    <Route path="report/waste" element={<WasteReport />} />
+                    <Route path="report/export" element={<ReportExport />} />
+
+                    {/* Các route khác */}
+                    <Route path="inventory" element={<div>Kho hàng</div>} />
+                    <Route
+                        path="waste-report"
+                        element={<div>Báo cáo lãng phí</div>}
+                    />
+                    <Route path="messages" element={<div>Tin nhắn</div>} />
+                    <Route path="settings" element={<div>Cài đặt</div>} />
                 </Route>
             </Routes>
         </Router>
