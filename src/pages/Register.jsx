@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import axios from "axios";
+import Logo from "../assets/Logo.svg";
 function Register() {
     const navigate = useNavigate();
 
     const [form, setForm] = useState({
         name: "",
-        phone: "",
         email: "",
         password: "",
-        storeName: "",
         address: "",
+        nameBrand: "",
+        addressBrand: "",
     });
 
     const handleChange = (e) => {
@@ -20,39 +21,38 @@ function Register() {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // Validate đơn giản
-        if (
-            !form.name ||
-            !form.phone ||
-            !form.email ||
-            !form.password ||
-            !form.storeName ||
-            !form.address
-        ) {
-            alert("Vui lòng nhập đầy đủ thông tin!");
-            return;
+        try{
+            const res = await axios.post(
+                "https://wasteless-ai.onrender.com/api/auth/register",
+                form
+            );
+            console.log(res.data);
+            
+            alert("Đăng ký thành công");
+        } catch(error){
+            console.log(error.responsi?.data);
+            
+            alert("Đăng ký không thành công");
         }
-
-        // Lưu tạm user (demo)
-        localStorage.setItem("user", JSON.stringify(form));
-
-        alert("Đăng ký thành công!");
-
-        // Quay về login
-        navigate("/");
-    };
+    }
 
     return (
         <div className="min-h-screen bg-gray-100">
 
             {/* Header */}
-            <div className="flex justify-between items-center px-4 py-2 bg-white shadow-sm">
-                <h1 className="font-semibold text-gray-700 text-lg">
-                    🍃 Food Waste
-                </h1>
+           <div className="flex justify-between items-center px-4 py-2 bg-white shadow-sm">
+                            <div className="flex justify-between items-center px-4 py-2 bg-white shadow-sm">
+                                <h1 className="flex items-center gap-2 font-semibold text-lg text-green-600">
+                                    <img
+                                        src={Logo}
+                                        alt="logo"
+                                        className="w-6 h-6 object-contain"
+                                    />
+                                    FWMS
+                                </h1>
+                            </div>
 
                 <p className="text-sm text-gray-500">
                     Đã có tài khoản?{" "}
@@ -69,7 +69,7 @@ function Register() {
             </div>
 
             {/* Form */}
-            <div className="relative z-10 flex justify-center -mt-24 px-4">
+            <div className="relative z-10 flex justify-center -mt-24 px-4 pb-24">
                 <form
                     onSubmit={handleSubmit}
                     className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-3xl"
@@ -96,10 +96,10 @@ function Register() {
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                         />
                         <input
-                            name="phone"
-                            value={form.phone}
+                            name="address"
+                            value={form.address}
                             onChange={handleChange}
-                            placeholder="Nhập số điện thoại"
+                            placeholder="Nhập địa chỉ"
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                         />
                         <input
@@ -126,15 +126,15 @@ function Register() {
 
                     <div className="space-y-4 mb-6">
                         <input
-                            name="storeName"
-                            value={form.storeName}
+                            name="nameBrand"
+                            value={form.nameBrand}
                             onChange={handleChange}
                             placeholder="Nhập tên nhà hàng hoặc khách sạn"
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                         />
                         <input
-                            name="address"
-                            value={form.address}
+                            name="addressBrand"
+                            value={form.addressBrand}
                             onChange={handleChange}
                             placeholder="Số nhà, tên đường, quận/huyện, thành phố"
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"

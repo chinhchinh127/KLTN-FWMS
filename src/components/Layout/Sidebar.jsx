@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
     Users,
@@ -16,6 +16,7 @@ import logo from "../../assets/Logo.svg";
 
 const Sidebar = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const [openMenus, setOpenMenus] = useState({
         consumption: true,
     });
@@ -26,6 +27,11 @@ const Sidebar = () => {
             [menu]: !prev[menu],
         }));
     };
+
+    const logout = () => {
+        localStorage.removeItem("token");
+        navigate("/");
+    }
 
     const isConsumptionActive =
         location.pathname.includes("/customers") ||
@@ -249,7 +255,7 @@ const Sidebar = () => {
                         </p>
                     </div>
                 </div>
-                <button className="flex items-center gap-2 text-[#8B8B8B] hover:text-[#141C21] w-full px-3 py-1.5 rounded-lg hover:bg-gray-100 text-xs">
+                <button onClick={logout} className="flex items-center gap-2 text-[#8B8B8B] hover:text-[#141C21] w-full px-3 py-1.5 rounded-lg hover:bg-gray-100 text-xs">
                     <LogOut size={14} />
                     <span>Đăng xuất</span>
                 </button>
