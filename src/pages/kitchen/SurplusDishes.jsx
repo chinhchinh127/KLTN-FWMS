@@ -9,7 +9,7 @@ import {
     PlusCircle,
     X,
 } from "lucide-react";
-import ServedDishes from "./ServedDishes"; // import component Món ra
+import ServedDishes from "./ServedDishes/ServedDishes"; // import component Món ra
 
 const SurplusDishes = () => {
     // State cho thanh điều hướng chính
@@ -18,7 +18,7 @@ const SurplusDishes = () => {
     // Các state cho phần Món dư
     const [activeTab, setActiveTab] = useState("all");
     const [selectedDish, setSelectedDish] = useState(null);
-    const [quantity, setQuantity] = useState(15);
+    const [quantity, setQuantity] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
@@ -120,8 +120,15 @@ const SurplusDishes = () => {
 
     const handleSaveReport = () => {
         if (selectedDish) {
+            const updatedDishes = dishes.map((dish) =>
+                dish.id === selectedDish.id
+                    ? { ...dish, prepared: quantity } // ← Đổi từ served thành prepared
+                    : dish,
+            );
+            setDishes(updatedDishes);
+            setSelectedDish({ ...selectedDish, prepared: quantity }); // ← Đổi từ served thành prepared
             alert(
-                `Đã cập nhật hao hụt cho món ${selectedDish.name}: ${quantity} phần`,
+                `Đã cập nhật số lượng đã ra cho món ${selectedDish.name}: ${quantity} phần`,
             );
         }
     };
@@ -130,18 +137,16 @@ const SurplusDishes = () => {
         alert("Thêm báo cáo mới");
     };
 
-    const handleEditClick = (dish, e) => {
-        e.stopPropagation();
+    const handleEditClick = (dish) => {
+        // e.stopPropagation();
         setSelectedDish(dish);
-        setQuantity(dish.waste);
+        setQuantity(dish.prepared);
     };
 
     const handleRowClick = (dish) => {
         // Chỉ cho phép đổi món nếu đã có món đang được chọn
-        if (selectedDish) {
-            setSelectedDish(dish);
-            setQuantity(dish.served);
-        }
+        setSelectedDish(dish);
+        setQuantity(dish.prepared);
     };
 
     const handleCloseDetail = () => {
