@@ -1,8 +1,13 @@
 import { Navigate } from "react-router-dom";
-
+import { jwtDecode } from "jwt-decode";
 const PrivateRoute = ({ children }) => {
-    const isLogin = localStorage.getItem("token");
-    return isLogin ? children : <Navigate to="/" />;
+    const token = localStorage.getItem("token");
+    const decode = jwtDecode(token);
+    if (decode.role == "Manager") {
+        return children;
+    } else {
+        return Navigate("/");
+    }
 };
 
 export default PrivateRoute;

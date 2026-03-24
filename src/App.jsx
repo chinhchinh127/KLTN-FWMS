@@ -51,7 +51,12 @@ function App() {
                 </Route>
 
                 {/* Tạm thời comment kitchen routes  */}
-                <Route path="/kitchen" element={<KitchenLayout />}>
+                <Route path="/kitchen"
+                    element={
+                        <KitchenRoute>
+                            <KitchenLayout/>
+                        </KitchenRoute>
+                    }>
                     <Route index element={<KitchenDashboard />} />
                     <Route path="surplus-dishes" element={<SurplusDishes />} />
 
