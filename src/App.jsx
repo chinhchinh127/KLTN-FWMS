@@ -21,7 +21,7 @@ import SurplusReport from "./pages/kitchen/reports/SurplusReport";
 import RevenueReport from "./pages/kitchen/reports/RevenueReport";
 import WasteReport from "./pages/kitchen/reports/WasteReport";
 import ReportExport from "./pages/kitchen/ReportExport";
-
+import KitchenRoute from "./components/KitchenRoute";
 function App() {
     return (
         <Router basename="/KLTN-FWMS">
@@ -51,29 +51,16 @@ function App() {
                 </Route>
 
                 {/* Tạm thời comment kitchen routes  */}
-                <Route path="/kitchen"
+                <Route
+                    path="/kitchen"
                     element={
                         <KitchenRoute>
-                            <KitchenLayout/>
+                            <KitchenLayout />
                         </KitchenRoute>
-                    }>
+                    }
+                >
                     <Route index element={<KitchenDashboard />} />
                     <Route path="surplus-dishes" element={<SurplusDishes />} />
-
-                    {/*  Các route báo cáo mới */}
-                    <Route path="report/surplus" element={<SurplusReport />} />
-                    <Route path="report/revenue" element={<RevenueReport />} />
-                    <Route path="report/waste" element={<WasteReport />} />
-                    <Route path="report/export" element={<ReportExport />} />
-
-                    {/* Các route khác */}
-                    <Route path="inventory" element={<div>Kho hàng</div>} />
-                    <Route
-                        path="waste-report"
-                        element={<div>Báo cáo lãng phí</div>}
-                    />
-                    <Route path="messages" element={<div>Tin nhắn</div>} />
-                    <Route path="settings" element={<div>Cài đặt</div>} />
                 </Route>
             </Routes>
         </Router>
