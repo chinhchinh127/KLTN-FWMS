@@ -16,7 +16,11 @@ import Revenue from "./pages/Revenue";
 import PrivateRoute from "./components/PrivateRoute";
 import WasteHistory from "./pages/WasteHistory";
 import Manager_Account_Staff from "./pages/Manager_Account_Staff";
+import FoodManager from "./pages/foodManager";
+import IngredientManager from "./pages/IngredientManager";
+
 import SurplusDishes from "./pages/kitchen/SurplusDishes";
+
 
 function App() {
     return (
@@ -37,6 +41,8 @@ function App() {
                     <Route index element={<Dashboard />} />
                     <Route path="customers" element={<Customers />} />
                     <Route path="food-data" element={<FoodData />} />
+                    <Route path="foods" element={<FoodManager />} />
+                    <Route path="ingredients" element={<IngredientManager />} />
 
                     <Route
                         path="accounts"
