@@ -40,35 +40,177 @@ function FoodFormModal({ initial, onClose, onSave, isEdit }) {
   const [form, setForm] = useState(
     initial || { category: "", name: "", price: "", status: "active" }
   );
+  const [ingredients, setIngredients] = useState(initial?.ingredients || []);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+
+  const addIngredient = () =>
+    setIngredients((prev) => [...prev, { name: "", unit: "kg", qty: "" }]);
+
+  const removeIngredient = (i) =>
+    setIngredients((prev) => prev.filter((_, idx) => idx !== i));
+
+  const setIngredient = (i, field) => (e) =>
+    setIngredients((prev) =>
+      prev.map((item, idx) => idx === i ? { ...item, [field]: e.target.value } : item)
+    );
 
   const handleSave = () => {
     if (!form.name || !form.category || !form.price) return;
-    onSave({ ...form, id: initial?.id || Date.now(), icon: initial?.icon || "restaurant" });
+    onSave({
+      ...form,
+      ingredients,
+      id: initial?.id || Date.now(),
+      icon: initial?.icon || "restaurant",
+    });
     onClose();
   };
 
-  const inputClass = "w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400 transition-all";
+  const inputClass =
+    "w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400 transition-all";
   const labelClass = "block text-xs font-bold uppercase tracking-wider mb-1.5";
 
+  const INGREDIENT_OPTIONS = [
+    "Thịt bò", "Thịt heo", "Thịt gà", "Tôm", "Cá", "Mực",
+    "Rau cải", "Hành lá", "Hành tây", "Tỏi", "Gừng",
+    "Cà chua", "Khoai tây", "Cà rốt", "Ớt",
+    "Bột mì", "Bột năng", "Phô mai", "Trứng",
+    "Dầu ăn", "Muối", "Đường", "Nước mắm", "Nước tương",
+    "Tiêu", "Sả", "Lá chanh",
+  ];
+
+  const UNIT_OPTIONS = ["kg", "g", "lít", "ml", "cái", "bó", "muỗng", "tbsp", "tsp", "hộp", "gói"];
+
   return (
+
+
     <Modal title={isEdit ? "Cập nhật món ăn" : "Thêm món ăn mới"} onClose={onClose}>
       <div className="space-y-4" style={{ fontFamily: "'Nunito', sans-serif" }}>
+
+        {/* Danh mục */}
         <div>
-          <label className={labelClass} style={{ color: "var(--color-text-3)" }}>Danh mục món ăn <span className="text-red-400">*</span></label>
-          <select value={form.category} onChange={set("category")} className={inputClass} style={{ color: "var(--color-text-1)" }}>
+          <label className={labelClass} style={{ color: "var(--color-text-3)" }}>
+            Danh mục món ăn <span className="text-red-400">*</span>
+          </label>
+          <select
+            value={form.category}
+            onChange={set("category")}
+            className={inputClass}
+            style={{ color: "var(--color-text-1)" }}
+          >
             <option value="">Chọn danh mục...</option>
-            {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+            {CATEGORIES.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
           </select>
         </div>
+
+        {/* Tên món */}
         <div>
-          <label className={labelClass} style={{ color: "var(--color-text-3)" }}>Tên món ăn <span className="text-red-400">*</span></label>
-          <input type="text" value={form.name} onChange={set("name")} placeholder="VD: Phở Bò Đặc Biệt" className={inputClass} style={{ color: "var(--color-text-1)" }} />
+          <label className={labelClass} style={{ color: "var(--color-text-3)" }}>
+            Tên món ăn <span className="text-red-400">*</span>
+          </label>
+          <input
+            type="text"
+            value={form.name}
+            onChange={set("name")}
+            placeholder="VD: Phở Bò Đặc Biệt"
+            className={inputClass}
+            style={{ color: "var(--color-text-1)" }}
+          />
         </div>
+
+        {/* Đơn giá */}
         <div>
-          <label className={labelClass} style={{ color: "var(--color-text-3)" }}>Đơn giá (đ) <span className="text-red-400">*</span></label>
-          <input type="text" value={form.price} onChange={set("price")} placeholder="VD: 85.000" className={inputClass} style={{ color: "var(--color-text-1)" }} />
+          <label className={labelClass} style={{ color: "var(--color-text-3)" }}>
+            Đơn giá (đ) <span className="text-red-400">*</span>
+          </label>
+          <input
+            type="text"
+            value={form.price}
+            onChange={set("price")}
+            placeholder="VD: 85.000"
+            className={inputClass}
+            style={{ color: "var(--color-text-1)" }}
+          />
         </div>
+
+        {/* Nguyên liệu */}
+        <div className="space-y-2">
+          {ingredients.map((ing, i) => (
+            <div
+              key={i}
+              className="flex gap-2 items-center px-2 py-2 rounded-xl"
+              style={{ background: "var(--color-bg-2, #f8fafb)", border: "1px solid #f0f0f0" }}
+            >
+              <span
+                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{ background: "rgba(16,188,93,0.12)", color: "var(--color-primary)" }}
+              >
+                {i + 1}
+              </span>
+
+              <select
+                value={ing.name}
+                onChange={setIngredient(i, "name")}
+                className="flex-1 rounded-lg px-2 py-2 text-sm outline-none focus:border-green-400 transition-all"
+                style={{
+                  color: ing.name ? "var(--color-text-1)" : "var(--color-text-4)",
+                  background: "var(--color-bg-1, #fff)",
+                  border: "1px solid #e5e7eb",
+                }}
+              >
+                <option value="">Chọn nguyên liệu...</option>
+                {INGREDIENT_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+
+              <input
+                type="number"
+                min="0"
+                value={ing.qty}
+                onChange={setIngredient(i, "qty")}
+                placeholder="0"
+                className="rounded-lg px-2 py-2 text-sm outline-none focus:border-green-400 transition-all text-center"
+                style={{ width: 64, color: "var(--color-text-1)", background: "var(--color-bg-1, #fff)", border: "1px solid #e5e7eb" }}
+              />
+
+              <select
+                value={ing.unit}
+                onChange={setIngredient(i, "unit")}
+                className="rounded-lg px-2 py-2 text-sm outline-none focus:border-green-400 transition-all"
+                style={{ width: 80, color: "var(--color-text-1)", background: "var(--color-bg-1, #fff)", border: "1px solid #e5e7eb" }}
+              >
+                {UNIT_OPTIONS.map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+              </select>
+
+              {/* Xóa */}
+              <button
+                onClick={() => removeIngredient(i)}
+                className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all hover:opacity-80 active:scale-95"
+                style={{ color: "#ef4444", background: "rgba(239,68,68,0.08)", border: "none" }}
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+
+          {/* Nút thêm nguyên liệu */}
+          <div className="pt-2">
+            <button
+              onClick={addIngredient}
+              className="py-2 px-4 rounded-xl border-2 text-sm font-bold transition-all hover:bg-green-50 active:scale-95"
+              style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
+            >
+              + Thêm nguyên liệu
+            </button>
+          </div>
+        </div>
+
+        {/* Trạng thái */}
         <div>
           <label className={labelClass} style={{ color: "var(--color-text-3)" }}>Trạng thái</label>
           <div className="flex gap-3">
@@ -83,20 +225,30 @@ function FoodFormModal({ initial, onClose, onSave, isEdit }) {
                     : { borderColor: "#e5e7eb", color: "var(--color-text-3)" }
                 }
               >
-                <span className="inline-block w-2 h-2 rounded-full mr-2"
-                  style={{ background: form.status === opt.value ? "var(--color-primary)" : "#d1d5db" }} />
+                <span
+                  className="inline-block w-2 h-2 rounded-full mr-2"
+                  style={{ background: form.status === opt.value ? "var(--color-primary)" : "#d1d5db" }}
+                />
                 {opt.label}
               </button>
             ))}
           </div>
         </div>
+
+        {/* Actions */}
         <div className="flex gap-3 pt-2">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border text-sm font-bold transition-all hover:opacity-80"
-            style={{ borderColor: "var(--color-text-4)", color: "var(--color-text-2)" }}>
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-xl border text-sm font-bold transition-all hover:opacity-80"
+            style={{ borderColor: "var(--color-text-4)", color: "var(--color-text-2)" }}
+          >
             Hủy
           </button>
-          <button onClick={handleSave} className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90 active:scale-95"
-            style={{ background: "linear-gradient(135deg, var(--color-primary), #0da04f)" }}>
+          <button
+            onClick={handleSave}
+            className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90 active:scale-95"
+            style={{ background: "linear-gradient(135deg, var(--color-primary), #0da04f)" }}
+          >
             {isEdit ? "Lưu thay đổi" : "Thêm món ăn"}
           </button>
         </div>
