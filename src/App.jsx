@@ -16,12 +16,20 @@ import Revenue from "./pages/Revenue";
 import PrivateRoute from "./components/PrivateRoute";
 import WasteHistory from "./pages/WasteHistory";
 import Manager_Account_Staff from "./pages/Manager_Account_Staff";
+import FoodManager from "./pages/foodManager";
+import IngredientManager from "./pages/IngredientManager";
+
 import SurplusDishes from "./pages/kitchen/SurplusDishes";
+
 import SurplusReport from "./pages/kitchen/reports/SurplusReport";
 import RevenueReport from "./pages/kitchen/reports/RevenueReport";
 import WasteReport from "./pages/kitchen/reports/WasteReport";
 import ReportExport from "./pages/kitchen/ReportExport";
 import KitchenRoute from "./components/KitchenRoute";
+
+
+
+
 function App() {
     return (
         <Router basename="/KLTN-FWMS">
@@ -41,6 +49,8 @@ function App() {
                     <Route index element={<Dashboard />} />
                     <Route path="customers" element={<Customers />} />
                     <Route path="food-data" element={<FoodData />} />
+                    <Route path="foods" element={<FoodManager />} />
+                    <Route path="ingredients" element={<IngredientManager />} />
 
                     <Route
                         path="accounts"
