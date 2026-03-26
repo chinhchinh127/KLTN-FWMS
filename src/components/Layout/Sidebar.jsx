@@ -64,10 +64,9 @@ const Sidebar = () => {
                 <NavLink
                     to="/app"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -79,11 +78,10 @@ const Sidebar = () => {
                 <div className="mb-1">
                     <button
                         onClick={() => toggleMenu("consumption")}
-                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                            isConsumptionActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
-                        }`}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-colors ${isConsumptionActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
+                            }`}
                     >
                         <div className="flex items-center gap-3">
                             <Users size={18} />
@@ -117,10 +115,9 @@ const Sidebar = () => {
                             <NavLink
                                 to="/app/customers"
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-2 rounded-lg mb-1 transition-colors ${
-                                        isActive
-                                            ? "bg-[#10BC5D] text-white"
-                                            : "text-[#3D3D3D] hover:bg-gray-100"
+                                    `flex items-center gap-3 px-3 py-2 rounded-lg mb-1 transition-colors ${isActive
+                                        ? "bg-[#10BC5D] text-white"
+                                        : "text-[#3D3D3D] hover:bg-gray-100"
                                     }`
                                 }
                             >
@@ -131,10 +128,9 @@ const Sidebar = () => {
                             <NavLink
                                 to="/app/food-data"
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-2 rounded-lg mb-1 transition-colors ${
-                                        isActive
-                                            ? "bg-[#10BC5D] text-white"
-                                            : "text-[#3D3D3D] hover:bg-gray-100"
+                                    `flex items-center gap-3 px-3 py-2 rounded-lg mb-1 transition-colors ${isActive
+                                        ? "bg-[#10BC5D] text-white"
+                                        : "text-[#3D3D3D] hover:bg-gray-100"
                                     }`
                                 }
                             >
@@ -148,10 +144,9 @@ const Sidebar = () => {
                 <NavLink
                     to="/app/accounts"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -162,28 +157,41 @@ const Sidebar = () => {
                 </NavLink>
 
                 <NavLink
-                    to="/foods"
+                    to="foods"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
                     <Utensils size={18} />
                     <span className="text-sm font-medium">
-                        Quản lý thực phẩm
+                        Quản lý nguyên liệu
+                    </span>
+                </NavLink>
+
+                <NavLink
+                    to="ingredients"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
+                        }`
+                    }
+                >
+                    <Utensils size={18} />
+                    <span className="text-sm font-medium">
+                        Quản lý món ăn 
                     </span>
                 </NavLink>
 
                 <NavLink
                     to="/waste-report"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -196,10 +204,9 @@ const Sidebar = () => {
                 <NavLink
                     to="/ai-analysis"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -210,10 +217,9 @@ const Sidebar = () => {
                 <NavLink
                     to="/app/waste-history"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -226,10 +232,9 @@ const Sidebar = () => {
                 <NavLink
                     to="/app/revenue"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
