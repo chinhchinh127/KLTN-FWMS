@@ -16,7 +16,7 @@ import {
 } from "../api/revenueApi.js";
 
 const Revenue = () => {
-    // ✅ set default để không bị undefined
+    // set default để không bị undefined
     const [stats, setStats] = useState({
         today: 0,
         month: 0,
@@ -50,13 +50,13 @@ const Revenue = () => {
         fetchData();
     }, []);
 
-    // 👉 format tiền (fix undefined)
+    //  format tiền (fix undefined)
     const formatMoney = (num) => {
         if (!num) return "0 VNĐ";
         return num.toLocaleString("vi-VN") + " VNĐ";
     };
 
-    // 👉 tránh crash khi chartData rỗng
+    //  tránh crash khi chartData rỗng
     const maxValue =
         chartData.length > 0
             ? Math.max(...chartData.map((d) => d.value))

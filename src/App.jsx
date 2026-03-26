@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
+import ChatWidget from "./components/ChatWidget";
 import KitchenLayout from "./components/Layout/KitchenLayout"; // COMMENT
 
 // Kitchen pages
@@ -22,6 +23,7 @@ import KitchenRoute from "./components/KitchenRoute";
 function App() {
     return (
         <Router basename="/KLTN-FWMS">
+             <ChatWidget />
             <Routes>
                 {/* Admin routes */}
                 <Route path="/" element={<Login />} />
