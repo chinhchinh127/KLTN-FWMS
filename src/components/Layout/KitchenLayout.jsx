@@ -4,9 +4,9 @@ import KitchenSidebar from "./KitchenSidebar";
 
 const KitchenLayout = () => {
     return (
-        <div className="flex h-screen overflow-hidden bg-white">
+        <div className="flex h-screen bg-white">
             <KitchenSidebar />
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1">
                 <Outlet />
             </div>
         </div>

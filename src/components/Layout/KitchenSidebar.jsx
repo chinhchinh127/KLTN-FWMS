@@ -1,5 +1,6 @@
+// src/components/Layout/KitchenSidebar.jsx
 import React, { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
     Package,
@@ -10,13 +11,20 @@ import {
     ChevronDown,
     ChevronRight,
     PlusCircle,
+    FileSpreadsheet, // 👈 Thêm icon cho menu Báo cáo
+    TrendingUp, // 👈 Icon cho báo cáo doanh thu
+    AlertTriangle, // 👈 Icon cho báo cáo thất thoát
+    ClipboardList, // 👈 Icon cho báo cáo món dư
+    Download, // 👈 Icon xuất
 } from "lucide-react";
 import logo from "../../assets/Logo.svg";
 
 const KitchenSidebar = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const [openMenus, setOpenMenus] = useState({
         kitchen: true,
+        report: true, // 👈 Thêm state cho menu báo cáo
     });
 
     const toggleMenu = (menu) => {
@@ -25,6 +33,11 @@ const KitchenSidebar = () => {
             [menu]: !prev[menu],
         }));
     };
+
+    const logout = () => {
+        localStorage.removeItem("token");
+        navigate("/");
+    }
 
     const isKitchenActive = location.pathname.includes("/kitchen");
 
@@ -55,10 +68,9 @@ const KitchenSidebar = () => {
                 <NavLink
                     to="/kitchen"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -70,10 +82,9 @@ const KitchenSidebar = () => {
                 <NavLink
                     to="/kitchen/inventory"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -81,14 +92,101 @@ const KitchenSidebar = () => {
                     <span className="text-sm font-medium">Kho hàng</span>
                 </NavLink>
 
-                {/* Báo cáo lãng phí */}
+                {/* ===== MENU BÁO CÁO ===== */}
+                <div className="mb-1">
+                    {/* Button mở menu báo cáo */}
+                    <button
+                        onClick={() => toggleMenu("report")}
+                        className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors text-[#3D3D3D] hover:bg-gray-100"
+                    >
+                        <div className="flex items-center gap-3">
+                            <FileSpreadsheet size={18} />
+                            <span className="text-sm font-medium">
+                                Báo cáo & Xuất
+                            </span>
+                        </div>
+                        {openMenus.report ? (
+                            <ChevronDown size={16} />
+                        ) : (
+                            <ChevronRight size={16} />
+                        )}
+                    </button>
+
+                    {/* Submenu báo cáo */}
+                    {openMenus.report && (
+                        <div className="ml-7 mt-1 space-y-1">
+                            {/* Báo cáo món dư */}
+                            <NavLink
+                                to="/kitchen/report/surplus"
+                                className={({ isActive }) =>
+                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                                        isActive
+                                            ? "bg-[#10BC5D]/10 text-[#10BC5D]"
+                                            : "text-[#8B8B8B] hover:bg-gray-100"
+                                    }`
+                                }
+                            >
+                                <ClipboardList size={16} />
+                                <span className="text-sm">
+                                    Món dư (Surplus)
+                                </span>
+                            </NavLink>
+
+                            {/* Báo cáo doanh thu */}
+                            <NavLink
+                                to="/kitchen/report/revenue"
+                                className={({ isActive }) =>
+                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                                        isActive
+                                            ? "bg-[#10BC5D]/10 text-[#10BC5D]"
+                                            : "text-[#8B8B8B] hover:bg-gray-100"
+                                    }`
+                                }
+                            >
+                                <TrendingUp size={16} />
+                                <span className="text-sm">Doanh thu</span>
+                            </NavLink>
+
+                            {/* Báo cáo thất thoát */}
+                            <NavLink
+                                to="/kitchen/report/waste"
+                                className={({ isActive }) =>
+                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                                        isActive
+                                            ? "bg-[#10BC5D]/10 text-[#10BC5D]"
+                                            : "text-[#8B8B8B] hover:bg-gray-100"
+                                    }`
+                                }
+                            >
+                                <AlertTriangle size={16} />
+                                <span className="text-sm">Thất thoát</span>
+                            </NavLink>
+
+                            {/* Báo cáo tổng hợp */}
+                            <NavLink
+                                to="/kitchen/report/export"
+                                className={({ isActive }) =>
+                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                                        isActive
+                                            ? "bg-[#10BC5D]/10 text-[#10BC5D]"
+                                            : "text-[#8B8B8B] hover:bg-gray-100"
+                                    }`
+                                }
+                            >
+                                <Download size={16} />
+                                <span className="text-sm">Xuất dữ liệu</span>
+                            </NavLink>
+                        </div>
+                    )}
+                </div>
+
+                {/* Báo cáo lãng phí (giữ lại để tương thích cũ) */}
                 <NavLink
                     to="/kitchen/waste-report"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -98,14 +196,13 @@ const KitchenSidebar = () => {
                     </span>
                 </NavLink>
 
-                {/* Món dư */}
+                {/* Món dư (giữ lại để tương thích cũ) */}
                 <NavLink
                     to="/kitchen/surplus-dishes"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -117,10 +214,9 @@ const KitchenSidebar = () => {
                 <NavLink
                     to="/kitchen/messages"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -132,10 +228,9 @@ const KitchenSidebar = () => {
                 <NavLink
                     to="/kitchen/settings"
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                            isActive
-                                ? "bg-[#10BC5D] text-white"
-                                : "text-[#3D3D3D] hover:bg-gray-100"
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
                         }`
                     }
                 >
@@ -159,7 +254,7 @@ const KitchenSidebar = () => {
                         </p>
                     </div>
                 </div>
-                <button className="flex items-center gap-2 text-[#8B8B8B] hover:text-[#141C21] w-full px-3 py-1.5 rounded-lg hover:bg-gray-100 text-xs">
+                <button onClick={logout} className="flex items-center gap-2 text-[#8B8B8B] hover:text-[#141C21] w-full px-3 py-1.5 rounded-lg hover:bg-gray-100 text-xs">
                     <LogOut size={14} />
                     <span>Đăng xuất</span>
                 </button>

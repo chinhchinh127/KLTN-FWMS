@@ -1,21 +1,53 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import Logo from "../assets/Logo.svg";
 
 function Login() {
     const [showPassword, setShowPassword] = useState(false);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-
     const navigate = useNavigate();
 
-    const handleLogin = () => {
-        // ⚠️ Demo: kiểm tra đơn giản
-        if (email && password) {
-            localStorage.setItem("token", "123"); // giả lập đăng nhập
+    const [form, setForm] = useState({
+        email: "",
+        password: "",
+    });
 
-            navigate("/app"); // 👉 chuyển vào hệ thống
-        } else {
-            alert("Vui lòng nhập đầy đủ thông tin!");
+    const handChange = (e) => {
+        setForm({
+            ...form,
+            [e.target.name]: e.target.value,
+        })
+    }
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+
+        try {
+            const res = await axios.post("https://wasteless-ai.onrender.com/api/auth/login",
+                form
+            );
+            const token = res.data.data;
+            console.log(token);
+
+            localStorage.setItem("token", token);
+
+            const decode = jwtDecode(token);
+
+            // console.log(decode);
+            
+            alert("Đăng nhập thành công");
+
+            if(decode.role == "Manager"){
+                navigate("/app");
+            }else if(decode.role == "Kitchen"){
+                navigate("/kitchen");
+            }
+            
+
+        } catch (error) {
+            console.log(error.response?.data);
+            alert(error.response?.data?.message || "Đăng nhập thất bại")
         }
     };
     return (
@@ -24,10 +56,16 @@ function Login() {
 
             {/* Header */}
             <div className="flex justify-between items-center px-4 py-2 bg-white shadow-sm">
-                <h1 className="font-semibold text-gray-700 text-lg">
-                    🍃 Food Waste
-                </h1>
-
+                <div className="flex justify-between items-center px-4 py-2 bg-white shadow-sm">
+                    <h1 className="flex items-center gap-2 font-semibold text-lg text-green-600">
+                        <img
+                            src={Logo}
+                            alt="logo"
+                            className="w-6 h-6 object-contain"
+                        />
+                        FWMS
+                    </h1>
+                </div>
                 <p className="text-sm text-gray-500">
                     Chưa có tài khoản?{" "}
                     <Link to="/register" className="text-green-600 font-medium hover:underline">
@@ -56,8 +94,9 @@ function Login() {
                         </label>
                         <input
                             type="text"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            name="email"
+                            value={form.email}
+                            onChange={handChange}
                             placeholder="user@company.com hoặc NV-001"
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                         />
@@ -70,8 +109,9 @@ function Login() {
                         </label>
                         <input
                             type={showPassword ? "text" : "password"}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            name="password"
+                            value={form.password}
+                            onChange={handChange}
                             placeholder="••••••••"
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                         />
@@ -104,10 +144,6 @@ function Login() {
                     >
                         Đăng nhập
                     </button>
-
-
-
-
                 </div>
             </div>
         </div>

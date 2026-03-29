@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
+import ChatWidget from "./components/ChatWidget";
 import KitchenLayout from "./components/Layout/KitchenLayout"; // COMMENT
 
 // Kitchen pages
@@ -21,10 +22,19 @@ import IngredientManager from "./pages/IngredientManager";
 
 import SurplusDishes from "./pages/kitchen/SurplusDishes";
 
+import SurplusReport from "./pages/kitchen/reports/SurplusReport";
+import RevenueReport from "./pages/kitchen/reports/RevenueReport";
+import WasteReport from "./pages/kitchen/reports/WasteReport";
+import ReportExport from "./pages/kitchen/ReportExport";
+import KitchenRoute from "./components/KitchenRoute";
+
+
+
 
 function App() {
     return (
         <Router basename="/KLTN-FWMS">
+             <ChatWidget />
             <Routes>
                 {/* Admin routes */}
                 <Route path="/" element={<Login />} />
@@ -53,7 +63,14 @@ function App() {
                 </Route>
 
                 {/* Tạm thời comment kitchen routes  */}
-                <Route path="/kitchen" element={<KitchenLayout />}>
+                <Route
+                    path="/kitchen"
+                    element={
+                        <KitchenRoute>
+                            <KitchenLayout />
+                        </KitchenRoute>
+                    }
+                >
                     <Route index element={<KitchenDashboard />} />
                     <Route path="surplus-dishes" element={<SurplusDishes />} />
                 </Route>
