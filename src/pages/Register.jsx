@@ -32,7 +32,7 @@ function Register() {
             
             alert("Đăng ký thành công");
         } catch(error){
-            console.log(error.responsi?.data);
+            console.log(error.response?.data);
             
             alert("Đăng ký không thành công");
         }
