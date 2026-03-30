@@ -1,32 +1,30 @@
 import React, { useState } from "react";
 import {
     Edit2,
+    ChevronLeft,
+    ChevronRight,
     Minus,
     Plus,
     Save,
     X,
-    ChevronLeft,
-    ChevronRight,
     Calendar,
-    ChevronDown,
-    Search,
 } from "lucide-react";
 
-const DishDetailPanel = ({
+const SurplusDetailPanel = ({
     isTable,
     isDetail,
     isModal,
     dishes = [],
     selectedDish,
-    onRowClick,
-    onEditClick,
-    formatPrice,
     currentPage,
     totalPages,
     startIndex,
     endIndex,
     totalItems,
+    onRowClick,
+    onEditClick,
     onPageChange,
+    formatPrice,
     dish,
     quantity,
     onQuantityChange,
@@ -35,18 +33,14 @@ const DishDetailPanel = ({
     onAdd,
     existingDishes = [],
     selectedDate = new Date(),
-    isReadOnly = false,
-    allMasterDishes = [], // Nhận danh sách món từ component cha
 }) => {
-    // Modal thêm món
+    // Modal thêm món dư
     if (isModal) {
         const [dishName, setDishName] = useState("");
-        const [quantityPrepared, setQuantityPrepared] = useState(0);
+        const [quantityWasted, setQuantityWasted] = useState(0);
         const [loading, setLoading] = useState(false);
         const [error, setError] = useState("");
-        const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-        const [searchTerm, setSearchTerm] = useState("");
-        const [selectedDishId, setSelectedDishId] = useState(null);
+        const [suggestions, setSuggestions] = useState([]);
 
         const formatDate = (date) => {
             return date.toLocaleDateString("vi-VN", {
@@ -63,66 +57,42 @@ const DishDetailPanel = ({
             );
         };
 
-        const getExistingDishQuantity = (name) => {
+        const getExistingDishWaste = (name) => {
             const existing = existingDishes.find(
                 (dishItem) =>
                     dishItem.name?.toLowerCase() === name.toLowerCase(),
             );
-            return existing?.served || 0;
+            return existing?.waste || 0;
         };
 
-        // Lọc món ăn theo từ khóa tìm kiếm
-        const filteredDishes = allMasterDishes.filter((dish) =>
-            dish.name.toLowerCase().includes(searchTerm.toLowerCase()),
-        );
-
-        const handleSelectDish = (dish) => {
-            setDishName(dish.name);
-            setSelectedDishId(dish.id);
-            setSearchTerm("");
-            setIsDropdownOpen(false);
-            setError("");
-        };
-
-        const handleInputClick = () => {
-            setIsDropdownOpen(true);
-            setSearchTerm("");
-        };
-
-        const handleInputChange = (e) => {
+        const handleDishNameChange = (e) => {
             const value = e.target.value;
             setDishName(value);
-            setSelectedDishId(null);
-            setSearchTerm(value);
-            setIsDropdownOpen(true);
             setError("");
+
+            if (value.trim()) {
+                const filtered = existingDishes.filter((dish) =>
+                    dish.name.toLowerCase().includes(value.toLowerCase()),
+                );
+                setSuggestions(filtered.slice(0, 5));
+            } else {
+                setSuggestions([]);
+            }
+        };
+
+        const selectDish = (selected) => {
+            setDishName(selected.name);
+            setSuggestions([]);
         };
 
         const handleSubmit = async () => {
             if (!dishName.trim()) {
-                setError("Vui lòng chọn hoặc nhập tên món ăn!");
-                return;
-            }
-            if (quantityPrepared <= 0) {
-                setError("Vui lòng nhập số lượng hợp lệ!");
+                setError("Vui lòng nhập tên món ăn!");
                 return;
             }
 
-            console.log("=== SUBMIT FORM ===");
-            console.log("Dish name:", dishName);
-            console.log("Quantity:", quantityPrepared);
-            console.log("Selected dish ID:", selectedDishId);
-
-            // Kiểm tra món có trong master dishes không
-            const existsInMaster = allMasterDishes.some(
-                (d) => d.name.toLowerCase() === dishName.trim().toLowerCase(),
-            );
-            console.log("Exists in master dishes:", existsInMaster);
-
-            if (!existsInMaster) {
-                setError(
-                    `❌ Món "${dishName.trim()}" không có trong hệ thống. Vui lòng chọn từ danh sách.`,
-                );
+            if (quantityWasted <= 0) {
+                setError("Vui lòng nhập số lượng dư hợp lệ!");
                 return;
             }
 
@@ -130,56 +100,19 @@ const DishDetailPanel = ({
             setLoading(true);
 
             try {
-                const submitData = {
-                    name: dishName.trim(),
-                    quantity_prepared: Number(quantityPrepared),
-                };
-                console.log("Dữ liệu submit:", submitData);
-
                 if (onAdd) {
-                    await onAdd(submitData);
+                    await onAdd({
+                        dishName: dishName.trim(),
+                        quantity_wasted: quantityWasted,
+                    });
                 }
                 onClose();
             } catch (error) {
-                console.error("Lỗi khi submit:", error);
-
-                // Lấy thông tin lỗi chi tiết
-                let errorMsg = "Có lỗi xảy ra khi thêm món";
-
-                if (error.response?.data?.errors) {
-                    const errorData = error.response.data;
-
-                    // Kiểm tra lỗi không đủ nguyên liệu
-                    if (errorData.errors.includes("Not enough ingredient")) {
-                        const match = errorData.errors.match(
-                            /Not enough ingredient: (.*?)\. Required: ([\d.]+), Available: ([\d.]+)/,
-                        );
-                        if (match) {
-                            const ingredient = match[1].trim();
-                            const required = parseFloat(match[2]);
-                            const available = parseFloat(match[3]);
-
-                            errorMsg =
-                                `⚠️ KHÔNG ĐỦ NGUYÊN LIỆU!\n\n` +
-                                `Nguyên liệu: ${ingredient}\n` +
-                                `Cần: ${required} nguyên liệu\n` +
-                                `Còn: ${available} nguyên liệu\n` +
-                                `Thiếu: ${(required - available).toLocaleString()} nguyên liệu\n\n` +
-                                `💡 Vui lòng giảm số lượng món từ ${quantityPrepared} xuống còn ${Math.floor(available / (required / quantityPrepared))} phần`;
-                        } else {
-                            errorMsg = errorData.errors;
-                        }
-                    } else {
-                        errorMsg = errorData.message || errorData.errors;
-                    }
-                } else if (error.message) {
-                    errorMsg = error.message;
-                }
-
-                setError(errorMsg);
+                console.error("Lỗi:", error);
+                setError(error.message || "Có lỗi xảy ra khi thêm món dư");
                 setTimeout(() => {
                     setError("");
-                }, 8000); // Tăng thời gian hiển thị lỗi lên 8 giây
+                }, 5000);
             } finally {
                 setLoading(false);
             }
@@ -193,9 +126,9 @@ const DishDetailPanel = ({
                 />
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
-                        <div className="flex justify-between items-center p-6 border-b">
+                        {/* <div className="flex justify-between items-center p-6 border-b">
                             <h3 className="text-xl font-bold">
-                                Thêm món ra mới
+                                Thêm báo cáo món dư
                             </h3>
                             <button
                                 onClick={onClose}
@@ -204,7 +137,7 @@ const DishDetailPanel = ({
                             >
                                 <X size={24} />
                             </button>
-                        </div>
+                        </div> */}
                         <div className="mx-6 mt-2">
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
                                 <div className="flex items-center gap-2 text-sm text-blue-800">
@@ -214,6 +147,38 @@ const DishDetailPanel = ({
                                     </span>
                                 </div>
                             </div>
+
+                            {dishName && isDishExistsInToday(dishName) && (
+                                <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-2">
+                                    <div className="flex items-start gap-2">
+                                        <span className="text-orange-600 text-lg">
+                                            ⚠️
+                                        </span>
+                                        <div className="text-xs text-orange-800">
+                                            <p className="font-semibold">
+                                                Món này đã có trong ngày hôm
+                                                nay!
+                                            </p>
+                                            <p>
+                                                Số lượng dư sẽ được{" "}
+                                                <span className="font-bold">
+                                                    CỘNG DỒN
+                                                </span>{" "}
+                                                với số lượng hiện tại.
+                                            </p>
+                                            <p className="mt-1">
+                                                Số lượng dư hiện tại:{" "}
+                                                <span className="font-bold text-orange-700">
+                                                    {getExistingDishWaste(
+                                                        dishName,
+                                                    )}{" "}
+                                                    phần
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div className="p-6 space-y-4">
                             <div>
@@ -221,109 +186,54 @@ const DishDetailPanel = ({
                                     TÊN MÓN ĂN *
                                 </label>
                                 <div className="relative">
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={dishName}
-                                            onChange={handleInputChange}
-                                            onClick={handleInputClick}
-                                            disabled={loading}
-                                            placeholder="Nhập hoặc chọn món ăn..."
-                                            className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#10bc5d] focus:border-transparent disabled:bg-gray-100 pr-10"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                setIsDropdownOpen(
-                                                    !isDropdownOpen,
-                                                )
-                                            }
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                        >
-                                            <ChevronDown size={20} />
-                                        </button>
-                                    </div>
-
-                                    {isDropdownOpen && (
-                                        <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg">
-                                            <div className="p-2 border-b">
-                                                <div className="relative">
-                                                    <Search
-                                                        size={16}
-                                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                                                    />
-                                                    <input
-                                                        type="text"
-                                                        value={searchTerm}
-                                                        onChange={(e) =>
-                                                            setSearchTerm(
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        placeholder="Tìm kiếm món ăn..."
-                                                        className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#10bc5d] focus:border-transparent"
-                                                        autoFocus
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="max-h-60 overflow-auto">
-                                                {filteredDishes.length > 0 ? (
-                                                    filteredDishes.map(
-                                                        (dish) => (
-                                                            <div
-                                                                key={dish.id}
-                                                                className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-                                                                onClick={() =>
-                                                                    handleSelectDish(
-                                                                        dish,
-                                                                    )
-                                                                }
-                                                            >
-                                                                <div className="font-medium text-gray-900">
-                                                                    {dish.name}
-                                                                </div>
-                                                            </div>
-                                                        ),
-                                                    )
-                                                ) : (
-                                                    <div className="px-4 py-8 text-center text-gray-500">
-                                                        <p>
-                                                            Không tìm thấy món
-                                                            ăn
-                                                        </p>
-                                                        <p className="text-xs mt-1">
-                                                            Bạn có thể nhập tên
-                                                            món mới
-                                                        </p>
+                                    <input
+                                        type="text"
+                                        value={dishName}
+                                        onChange={handleDishNameChange}
+                                        disabled={loading}
+                                        placeholder="VD: Phở bò, Cơm gà, ..."
+                                        className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#10bc5d] focus:border-transparent disabled:bg-gray-100"
+                                    />
+                                    {suggestions.length > 0 && (
+                                        <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
+                                            {suggestions.map((dish) => (
+                                                <div
+                                                    key={dish.id}
+                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                                    onClick={() =>
+                                                        selectDish(dish)
+                                                    }
+                                                >
+                                                    <div className="font-medium">
+                                                        {dish.name}
                                                     </div>
-                                                )}
-                                            </div>
+                                                    <div className="text-xs text-red-600">
+                                                        Đã dư: {dish.waste} phần
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    💡 Có thể nhập tên món mới nếu không có
-                                    trong danh sách
-                                </p>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-semibold mb-2">
-                                    SỐ LƯỢNG CHUẨN BỊ *
+                                    SỐ LƯỢNG DƯ *
                                 </label>
                                 <input
                                     type="number"
                                     min="0"
-                                    value={quantityPrepared || ""}
+                                    value={quantityWasted || ""}
                                     onChange={(e) => {
                                         const value = parseInt(e.target.value);
-                                        setQuantityPrepared(
+                                        setQuantityWasted(
                                             isNaN(value) ? 0 : value,
                                         );
                                         setError("");
                                     }}
                                     disabled={loading}
-                                    placeholder="Nhập số lượng"
+                                    placeholder="Nhập số lượng dư"
                                     className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#10bc5d] disabled:bg-gray-100"
                                 />
                             </div>
@@ -344,14 +254,14 @@ const DishDetailPanel = ({
                             >
                                 Hủy
                             </button>
-                            <button
+                            {/* <button
                                 onClick={handleSubmit}
                                 disabled={
                                     loading ||
                                     !dishName.trim() ||
-                                    quantityPrepared <= 0
+                                    quantityWasted <= 0
                                 }
-                                className="flex-1 px-4 py-2.5 bg-[#10bc5d] text-white rounded-lg hover:bg-[#0c9c4a] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="flex-1 px-4 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {loading ? (
                                     <>
@@ -359,9 +269,9 @@ const DishDetailPanel = ({
                                         Đang xử lý...
                                     </>
                                 ) : (
-                                    "Thêm món ăn"
+                                    "Thêm báo cáo món dư"
                                 )}
-                            </button>
+                            </button> */}
                         </div>
                     </div>
                 </div>
@@ -377,9 +287,11 @@ const DishDetailPanel = ({
                     <thead className="bg-gray-50 border-b">
                         <tr className="text-[#8b8b8b] text-xs uppercase">
                             <th className="px-5 py-4 text-left">TÊN MÓN</th>
-                            <th className="px-5 py-4 text-left">ĐÃ RA</th>
+                            <th className="px-5 py-4 text-left">CHUẨN BỊ</th>
                             <th className="px-5 py-4 text-left">MÓN DƯ</th>
-                            <th className="px-5 py-4 text-left">DOANH THU</th>
+                            <th className="px-5 py-4 text-left">
+                                CHI PHÍ HAO HỤT
+                            </th>
                             <th className="px-5 py-4 text-center">HÀNH ĐỘNG</th>
                         </tr>
                     </thead>
@@ -389,7 +301,7 @@ const DishDetailPanel = ({
                                 key={dishItem.id}
                                 className={`border-b cursor-pointer hover:bg-gray-50 ${
                                     selectedDish?.id === dishItem.id
-                                        ? "bg-green-50"
+                                        ? "bg-orange-50"
                                         : ""
                                 }`}
                                 onClick={() => onRowClick(dishItem)}
@@ -403,21 +315,19 @@ const DishDetailPanel = ({
                                     </div>
                                 </td>
                                 <td className="px-5 py-4">
-                                    {dishItem.served} phần
+                                    {dishItem.prepared} phần
                                 </td>
                                 <td className="px-5 py-4">
-                                    {dishItem.quantity_wasted > 0 ? (
+                                    {dishItem.waste > 0 ? (
                                         <div>
                                             <span className="text-red-600 font-semibold">
-                                                {dishItem.quantity_wasted} phần
+                                                {dishItem.waste} phần
                                             </span>
-                                            <span className="text-xs text-red-500 block">
+                                            <span className="text-xs text-red-600 block">
                                                 (
-                                                {formatPrice
-                                                    ? formatPrice(
-                                                          dishItem.waste_cost,
-                                                      )
-                                                    : `${dishItem.waste_cost}₫`}
+                                                {formatPrice(
+                                                    dishItem.waste_cost,
+                                                )}
                                                 )
                                             </span>
                                         </div>
@@ -428,11 +338,7 @@ const DishDetailPanel = ({
                                     )}
                                 </td>
                                 <td className="px-5 py-4">
-                                    {formatPrice
-                                        ? formatPrice(
-                                              dishItem.revenue_cost || 0,
-                                          )
-                                        : `${dishItem.revenue_cost || 0}₫`}
+                                    {formatPrice(dishItem.waste_cost || 0)}
                                 </td>
                                 <td className="px-5 py-4 text-center">
                                     <button
@@ -441,7 +347,6 @@ const DishDetailPanel = ({
                                             onEditClick(dishItem);
                                         }}
                                         className="text-[#10bc5d] hover:text-[#0c9c4a]"
-                                        disabled={isReadOnly}
                                     >
                                         <Edit2 size={18} />
                                     </button>
@@ -491,7 +396,7 @@ const DishDetailPanel = ({
 
     // Panel chi tiết
     if (isDetail && dish) {
-        const handleDetailServedChange = (e) => {
+        const handleDetailWasteChange = (e) => {
             const numericValue = e.target.value.replace(/[^\d]/g, "");
             if (numericValue === "") {
                 onQuantityChange(-quantity);
@@ -503,7 +408,7 @@ const DishDetailPanel = ({
         };
 
         return (
-            <div className="w-[420px] bg-white rounded-xl border p-6 shadow-md -mt-20">
+            <div className="w-[420px] bg-white rounded-xl border p-6 shadow-md -mt-40 overflow-y-auto scrollbar-hide">
                 <div className="flex justify-end">
                     <button
                         onClick={onClose}
@@ -513,7 +418,7 @@ const DishDetailPanel = ({
                     </button>
                 </div>
                 <h3 className="text-xl font-bold mb-2 border-l-4 border-[#10bc5d] pl-3">
-                    CHI TIẾT MÓN ĂN
+                    CHI TIẾT MÓN DƯ
                 </h3>
                 <div className="flex justify-center mb-2">
                     <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#10bc5d]/20 shadow-md">
@@ -528,14 +433,7 @@ const DishDetailPanel = ({
                         />
                     </div>
                 </div>
-                <div className="text-center mb-3">
-                    <h4 className="text-xl font-bold">{dish.name}</h4>
-                    <p className="text-sm font-semibold text-[#10bc5d] mt-1">
-                        {formatPrice
-                            ? formatPrice(dish.price)
-                            : `${dish.price}₫`}
-                    </p>
-                </div>
+
                 <div className="mb-4">
                     <p className="text-sm font-semibold uppercase">DANH MỤC</p>
                     <p className="text-base text-[#8b8b8b]">{dish.category}</p>
@@ -551,7 +449,7 @@ const DishDetailPanel = ({
                                     key={idx}
                                     className="flex items-start gap-2"
                                 >
-                                    <span className="text-[#10bc5d]">•</span>
+                                    <span className="text-orange-500">•</span>
                                     <span className="text-sm text-[#8b8b8b]">
                                         {item}
                                     </span>
@@ -567,12 +465,28 @@ const DishDetailPanel = ({
                 <div className="grid grid-cols-2 gap-4 mb-3">
                     <div className="bg-red-50 rounded-xl p-3">
                         <p className="text-xs font-semibold uppercase">
+                            CHUẨN BỊ
+                        </p>
+                        <p className="text-lg font-bold text-red-500">
+                            {dish.prepared} phần
+                        </p>
+                    </div>
+                    <div className="bg-orange-50 rounded-xl p-3">
+                        <p className="text-xs font-semibold uppercase">
+                            MÓN DƯ
+                        </p>
+                        <p className="text-lg font-bold text-orange-500">
+                            {dish.waste} phần
+                        </p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="bg-red-50 rounded-xl p-3">
+                        <p className="text-xs font-semibold uppercase">
                             CHI PHÍ HAO HỤT
                         </p>
                         <p className="text-lg font-bold text-red-500">
-                            {formatPrice
-                                ? formatPrice(dish.waste_cost || 0)
-                                : `${dish.waste_cost || 0}₫`}
+                            {formatPrice(dish.waste_cost || 0)}
                         </p>
                     </div>
                     <div className="bg-green-50 rounded-xl p-3">
@@ -580,21 +494,18 @@ const DishDetailPanel = ({
                             DOANH THU DỰ KIẾN
                         </p>
                         <p className="text-lg font-bold text-green-500">
-                            {formatPrice
-                                ? formatPrice(dish.revenue_cost || 0)
-                                : `${dish.revenue_cost || 0}₫`}
+                            {formatPrice(dish.revenue_cost || 0)}
                         </p>
                     </div>
                 </div>
-                <div className="pt-2">
+                <div className="pt-1">
                     <p className="text-sm font-semibold uppercase mb-2">
-                        CẬP NHẬT SỐ LƯỢNG ĐÃ RA
+                        CẬP NHẬT SỐ LƯỢNG DƯ
                     </p>
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => onQuantityChange(-1)}
-                            disabled={isReadOnly}
-                            className="w-10 h-10 rounded-xl border flex items-center justify-center hover:bg-[#10bc5d] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-10 h-10 rounded-xl border flex items-center justify-center hover:bg-orange-500 hover:text-white"
                         >
                             <Minus size={18} />
                         </button>
@@ -602,14 +513,12 @@ const DishDetailPanel = ({
                             type="text"
                             inputMode="numeric"
                             value={quantity || ""}
-                            onChange={handleDetailServedChange}
-                            disabled={isReadOnly}
-                            className="flex-1 h-10 px-3 border rounded-xl text-center focus:ring-2 focus:ring-[#10bc5d] disabled:bg-gray-100"
+                            onChange={handleDetailWasteChange}
+                            className="flex-1 h-10 px-3 border rounded-xl text-center focus:ring-2 focus:ring-orange-500"
                         />
                         <button
                             onClick={() => onQuantityChange(1)}
-                            disabled={isReadOnly}
-                            className="w-10 h-10 rounded-xl border flex items-center justify-center hover:bg-[#10bc5d] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-10 h-10 rounded-xl border flex items-center justify-center hover:bg-orange-500 hover:text-white"
                         >
                             <Plus size={18} />
                         </button>
@@ -617,10 +526,9 @@ const DishDetailPanel = ({
                 </div>
                 <button
                     onClick={onSave}
-                    disabled={isReadOnly}
-                    className="w-full mt-6 bg-[#10bc5d] text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-[#0c9c4a] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full mt-3 bg-[#10bc5d] text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-[#0c9c4a]"
                 >
-                    <Save size={18} /> <span>Lưu báo cáo hôm nay</span>
+                    <Save size={18} /> <span>Lưu báo cáo món dư</span>
                 </button>
             </div>
         );
@@ -629,4 +537,4 @@ const DishDetailPanel = ({
     return null;
 };
 
-export default DishDetailPanel;
+export default SurplusDetailPanel;

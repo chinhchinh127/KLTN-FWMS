@@ -20,7 +20,7 @@ import Manager_Account_Staff from "./pages/Manager_Account_Staff";
 import FoodManager from "./pages/foodManager";
 import IngredientManager from "./pages/IngredientManager";
 
-import SurplusDishes from "./pages/kitchen/SurplusDishes";
+import SurplusDishes from "./pages/kitchen/SurplusDishes/SurplusDishes";
 
 import SurplusReport from "./pages/kitchen/reports/SurplusReport";
 import RevenueReport from "./pages/kitchen/reports/RevenueReport";
@@ -28,18 +28,14 @@ import WasteReport from "./pages/kitchen/reports/WasteReport";
 import ReportExport from "./pages/kitchen/ReportExport";
 import KitchenRoute from "./components/KitchenRoute";
 
-
-
-
 function App() {
     return (
         <Router basename="/KLTN-FWMS">
-             <ChatWidget />
+            <ChatWidget />
             <Routes>
                 {/* Admin routes */}
                 <Route path="/" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-
                 <Route
                     path="/app"
                     element={
