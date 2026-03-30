@@ -153,6 +153,7 @@ const Revenue = () => {
                         <tr>
                             <th className="text-left p-4">Ngày giao dịch</th>
                             <th className="text-left p-4">Danh mục</th>
+                            <th className="text-left p-4">Số lượng</th>
                             <th className="text-left p-4">Số tiền</th>
                             <th className="text-left p-4">Trạng thái</th>
                         </tr>
@@ -164,6 +165,9 @@ const Revenue = () => {
                                 <tr key={item.id} className="border-t">
                                     <td className="p-4">{item.date}</td>
                                     <td className="p-4">{item.name}</td>
+                                    <td className="p-4">
+                                        {item.quantity || 0}
+                                    </td>
                                     <td className="p-4 font-semibold">
                                         {formatMoney(item.amount)}
                                     </td>
@@ -185,7 +189,7 @@ const Revenue = () => {
                         ) : (
                             <tr>
                                 <td
-                                    colSpan="4"
+                                    colSpan="5"
                                     className="text-center p-6 text-gray-400"
                                 >
                                     Không có dữ liệu

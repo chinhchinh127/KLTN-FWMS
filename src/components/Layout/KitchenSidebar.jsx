@@ -11,11 +11,12 @@ import {
     ChevronDown,
     ChevronRight,
     PlusCircle,
-    FileSpreadsheet, // 👈 Thêm icon cho menu Báo cáo
-    TrendingUp, // 👈 Icon cho báo cáo doanh thu
-    AlertTriangle, // 👈 Icon cho báo cáo thất thoát
-    ClipboardList, // 👈 Icon cho báo cáo món dư
-    Download, // 👈 Icon xuất
+    FileSpreadsheet,
+    TrendingUp,
+    AlertTriangle,
+    ClipboardList,
+    Download,
+    User,
 } from "lucide-react";
 import logo from "../../assets/Logo.svg";
 
@@ -24,7 +25,7 @@ const KitchenSidebar = () => {
     const navigate = useNavigate();
     const [openMenus, setOpenMenus] = useState({
         kitchen: true,
-        report: true, // 👈 Thêm state cho menu báo cáo
+        report: true,
     });
 
     const toggleMenu = (menu) => {
@@ -119,10 +120,9 @@ const KitchenSidebar = () => {
                             <NavLink
                                 to="/kitchen/report/surplus"
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                                        isActive
-                                            ? "bg-[#10BC5D]/10 text-[#10BC5D]"
-                                            : "text-[#8B8B8B] hover:bg-gray-100"
+                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isActive
+                                        ? "bg-[#10BC5D]/10 text-[#10BC5D]"
+                                        : "text-[#8B8B8B] hover:bg-gray-100"
                                     }`
                                 }
                             >
@@ -136,10 +136,9 @@ const KitchenSidebar = () => {
                             <NavLink
                                 to="/kitchen/report/revenue"
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                                        isActive
-                                            ? "bg-[#10BC5D]/10 text-[#10BC5D]"
-                                            : "text-[#8B8B8B] hover:bg-gray-100"
+                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isActive
+                                        ? "bg-[#10BC5D]/10 text-[#10BC5D]"
+                                        : "text-[#8B8B8B] hover:bg-gray-100"
                                     }`
                                 }
                             >
@@ -151,10 +150,9 @@ const KitchenSidebar = () => {
                             <NavLink
                                 to="/kitchen/report/waste"
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                                        isActive
-                                            ? "bg-[#10BC5D]/10 text-[#10BC5D]"
-                                            : "text-[#8B8B8B] hover:bg-gray-100"
+                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isActive
+                                        ? "bg-[#10BC5D]/10 text-[#10BC5D]"
+                                        : "text-[#8B8B8B] hover:bg-gray-100"
                                     }`
                                 }
                             >
@@ -166,10 +164,9 @@ const KitchenSidebar = () => {
                             <NavLink
                                 to="/kitchen/report/export"
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                                        isActive
-                                            ? "bg-[#10BC5D]/10 text-[#10BC5D]"
-                                            : "text-[#8B8B8B] hover:bg-gray-100"
+                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isActive
+                                        ? "bg-[#10BC5D]/10 text-[#10BC5D]"
+                                        : "text-[#8B8B8B] hover:bg-gray-100"
                                     }`
                                 }
                             >
@@ -223,6 +220,20 @@ const KitchenSidebar = () => {
                     <MessageSquare size={18} />
                     <span className="text-sm font-medium">Tin nhắn</span>
                 </NavLink>
+                {/* Thông tin cá nhân */}
+                <NavLink
+                    to="/kitchen/profile"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
+                        }`
+                    }
+                >
+                    <User size={18} />
+                    <span className="text-sm font-medium">Thông tin cá nhân</span>
+                </NavLink>
+                
 
                 {/* Cài đặt */}
                 <NavLink

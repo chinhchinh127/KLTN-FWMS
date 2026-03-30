@@ -3,10 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
 import ChatWidget from "./components/ChatWidget";
 import KitchenLayout from "./components/Layout/KitchenLayout"; // COMMENT
-
 // Kitchen pages
 import KitchenDashboard from "./pages/kitchen/KitchenDashboard"; // COMMENT
-
 // Admin/Main pages
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
@@ -19,22 +17,17 @@ import WasteHistory from "./pages/WasteHistory";
 import Manager_Account_Staff from "./pages/Manager_Account_Staff";
 import FoodManager from "./pages/foodManager";
 import IngredientManager from "./pages/IngredientManager";
-
 import SurplusDishes from "./pages/kitchen/SurplusDishes";
-
+import ProfilePage from "./pages/kitchen/ProfilePage";
 import SurplusReport from "./pages/kitchen/reports/SurplusReport";
 import RevenueReport from "./pages/kitchen/reports/RevenueReport";
 import WasteReport from "./pages/kitchen/reports/WasteReport";
 import ReportExport from "./pages/kitchen/ReportExport";
 import KitchenRoute from "./components/KitchenRoute";
-
-
-
-
+import WasteAlert from "./components/WasteAlert";
 function App() {
     return (
         <Router basename="/KLTN-FWMS">
-             <ChatWidget />
             <Routes>
                 {/* Admin routes */}
                 <Route path="/" element={<Login />} />
@@ -53,7 +46,7 @@ function App() {
                     <Route path="food-data" element={<FoodData />} />
                     <Route path="foods" element={<FoodManager />} />
                     <Route path="ingredients" element={<IngredientManager />} />
-
+                    <Route path="waste-report" element={<WasteAlert />} />
                     <Route
                         path="accounts"
                         element={<Manager_Account_Staff />}
@@ -73,10 +66,11 @@ function App() {
                 >
                     <Route index element={<KitchenDashboard />} />
                     <Route path="surplus-dishes" element={<SurplusDishes />} />
+                    <Route path="profile" element={<ProfilePage />} />
+                    <Route path="waste-report" element={<WasteAlert />} />
                 </Route>
             </Routes>
         </Router>
     );
 }
-
 export default App;

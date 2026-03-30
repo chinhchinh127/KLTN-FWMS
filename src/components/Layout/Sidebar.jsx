@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
+    AlertTriangle,
     Users,
     UserCircle,
     Utensils,
@@ -187,7 +188,7 @@ const Sidebar = () => {
                 </NavLink>
 
                 <NavLink
-                    to="/waste-report"
+                    to="/app/waste-report"
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
                             ? "bg-[#10BC5D] text-white"

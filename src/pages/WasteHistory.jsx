@@ -1,20 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getWasteHistory } from "../api/wasteApi";
 
-const getReasonColor = (reason) => {
-    switch (reason) {
-        case "Hết hạn":
-            return "bg-red-100 text-red-500";
-        case "Chế biến dư":
-            return "bg-orange-100 text-orange-500";
-        case "Sơ chế lỗi":
-            return "bg-blue-100 text-blue-500";
-        case "Hỏng hóc":
-            return "bg-pink-100 text-pink-500";
-        default:
-            return "bg-gray-100 text-gray-500";
-    }
-};
 
 // format tháng -> "Tháng 1 2026"
 const formatMonthVN = (value) => {
@@ -114,7 +100,6 @@ export default function WasteHistory() {
                             <th className="text-left p-3">NGÀY</th>
                             <th className="text-left p-3">TÊN NGUYÊN LIỆU/MÓN ĂN</th>
                             <th className="text-left p-3">KHỐI LƯỢNG</th>
-                            <th className="text-left p-3">LÝ DO</th>
                         </tr>
                     </thead>
 
@@ -125,15 +110,6 @@ export default function WasteHistory() {
                                     <td className="p-3">{item.date}</td>
                                     <td className="p-3 font-medium">{item.name}</td>
                                     <td className="p-3">{item.weight} kg</td>
-                                    <td className="p-3">
-                                        <span
-                                            className={`px-2 py-1 rounded-md text-xs ${getReasonColor(
-                                                item.reason
-                                            )}`}
-                                        >
-                                            {item.reason}
-                                        </span>
-                                    </td>
                                 </tr>
                             ))
                         ) : (
