@@ -42,6 +42,8 @@ function Login() {
                 navigate("/app");
             }else if(decode.role == "Kitchen"){
                 navigate("/kitchen");
+            }else if(decode.role == "Admin"){
+                navigate("/admin");
             }
             
 
