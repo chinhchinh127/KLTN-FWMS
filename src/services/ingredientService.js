@@ -6,7 +6,11 @@ export const getIngredients = async () => {
 };
 
 export const createIngredient = async (brandId, data) => {
-    const res = await api.post(`/ingredients/create-ingredient/${brandId}`, data);
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value);
+    });
+    const res = await api.post(`/ingredients/create-ingredient/${brandId}`, formData);
     return res.data;
 };
 
@@ -27,5 +31,9 @@ export const addIngredientTransaction = async (branchId, data) => {
 
 export const getIngredientById = async (id) => {
     const res = await api.get(`/ingredients/get-ingredient/${id}`);
+    return res.data;
+};
+export const getIngredientCategories = async () => {
+    const res = await api.get("/ingredients/category-ingredients");
     return res.data;
 };

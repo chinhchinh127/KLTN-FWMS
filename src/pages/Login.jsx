@@ -22,8 +22,9 @@ function Login() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-
         try {
+            console.log("ku đù");
+            
             const res = await axios.post("https://wasteless-ai.onrender.com/api/auth/login",
                 form
             );
@@ -44,10 +45,12 @@ function Login() {
                 navigate("/kitchen");
             }
             
-
         } catch (error) {
+            console.log("lỗi", error);
+            
             console.log(error.response?.data);
-            alert(error.response?.data?.message || "Đăng nhập thất bại")
+            // alert(error.response?.data?.message || "Đăng nhập thất bại")
+            alert(error)
         }
     };
     return (

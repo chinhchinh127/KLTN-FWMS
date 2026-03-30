@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { getIngredientCategories } from "../services/ingredientService";
 import {
     getIngredients,
     createIngredient,
@@ -28,8 +29,10 @@ function getCategoryBadge(name) {
     return categoryColorCache[name];
 }
 
-// Map API response → UI object (flexible với nhiều cấu trúc)
+
 function mapIngredient(raw) {
+    const stock = parseFloat(raw.current_stock);
+
     return {
         id: raw.id ?? raw._id,
         name: raw.name,
@@ -38,13 +41,21 @@ function mapIngredient(raw) {
             raw.category_name ??
             raw.category ??
             "—",
+
         ingredient_category_id:
             raw.ingredient_category_id ??
             raw.ingredient_category?.id ??
             "",
+
         unit: raw.unit,
-        stock: parseFloat(raw.current_stock ?? raw.stock ?? 0),
-        minimum_stock: parseFloat(raw.minimum_stock ?? 0),
+
+        stock: isNaN(stock) ? 0 : stock,
+
+        minimum_stock: parseFloat(
+            raw.minimum_stock ??
+            raw.minimumStock ??
+            0
+        ),
     };
 }
 
@@ -160,13 +171,14 @@ function Modal({ title, onClose, children }) {
 }
 
 // ─── ADD INGREDIENT MODAL ─────────────────────────────────────────────────────
-function AddIngredientModal({ onClose, onSave, categories }) {
+function AddIngredientModal({ onClose, onSave, brandId, categories }) {
     const [form, setForm] = useState({
         name: "",
-        ingredient_category_id: "",
-        unit: "",
+        ingredient_category_id: categories[0]?.id ?? "",
+        unit: UNITS[0],
         minimum_stock: "",
     });
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -177,19 +189,30 @@ function AddIngredientModal({ onClose, onSave, categories }) {
             setError("Vui lòng điền đầy đủ thông tin bắt buộc.");
             return;
         }
+
         setLoading(true);
         setError("");
+
         try {
-            const res = await createIngredient(form.ingredient_category_id, {
+            const payload = {
                 name: form.name,
                 ingredient_category_id: form.ingredient_category_id,
                 unit: form.unit,
-                minimum_stock: form.minimum_stock || "0",
-            });
+                minimum_stock: form.minimum_stock === "" ? null : Number(form.minimum_stock),
+
+                current_stock: 0,
+            };
+            console.log("payload:", payload);
+            console.log("brandId:", brandId);
+
+            const res = await createIngredient(brandId, payload);
             const raw = res?.data ?? res;
+            console.log("raw response create =", raw);
             onSave(mapIngredient(raw));
             onClose();
+
         } catch (e) {
+            console.log("error full:", e?.response);
             setError(e?.response?.data?.message ?? e.message);
         } finally {
             setLoading(false);
@@ -198,63 +221,75 @@ function AddIngredientModal({ onClose, onSave, categories }) {
 
     return (
         <Modal title="Thêm nguyên liệu mới" onClose={onClose}>
-            <div className="space-y-4" style={{ fontFamily: "'Nunito', sans-serif" }}>
+            <div className="space-y-4">
                 {error && <ErrorBox message={error} />}
 
                 <div>
-                    <label className={labelClass} style={{ color: "var(--color-text-3)" }}>
-                        Danh mục <span className="text-red-400">*</span>
-                    </label>
+                    <label className={labelClass}>Tên nguyên liệu <span style={{ color: "#f87171" }}>*</span></label>
+                    <input
+                        value={form.name}
+                        onChange={set("name")}
+                        placeholder="Nhập tên nguyên liệu..."
+                        className={inputClass}
+                    />
+                </div>
+
+                <div>
+                    <label className={labelClass}>Danh mục <span style={{ color: "#f87171" }}>*</span></label>
                     <select
                         value={form.ingredient_category_id}
                         onChange={set("ingredient_category_id")}
                         className={inputClass}
-                        style={{ color: "var(--color-text-1)" }}
                     >
-                        <option value="">Chọn danh mục...</option>
-                        {categories.map((c) => (
-                            <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
+                        {categories.length === 0 ? (
+                            <option value="">Chưa có danh mục</option>
+                        ) : (
+                            categories.map((c) => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                            ))
+                        )}
                     </select>
-                </div>
-
-                <div>
-                    <label className={labelClass} style={{ color: "var(--color-text-3)" }}>
-                        Tên nguyên liệu <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                        type="text" value={form.name} onChange={set("name")}
-                        placeholder="VD: Thịt ức gà tươi"
-                        className={inputClass} style={{ color: "var(--color-text-1)" }}
-                    />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className={labelClass} style={{ color: "var(--color-text-3)" }}>
-                            Đơn vị <span className="text-red-400">*</span>
-                        </label>
-                        <select value={form.unit} onChange={set("unit")} className={inputClass} style={{ color: "var(--color-text-1)" }}>
-                            <option value="">Chọn...</option>
-                            {UNITS.map((u) => <option key={u}>{u}</option>)}
+                        <label className={labelClass}>Đơn vị <span style={{ color: "#f87171" }}>*</span></label>
+                        <select value={form.unit} onChange={set("unit")} className={inputClass}>
+                            {UNITS.map((u) => (
+                                <option key={u} value={u}>{u}</option>
+                            ))}
                         </select>
                     </div>
                     <div>
-                        <label className={labelClass} style={{ color: "var(--color-text-3)" }}>
-                            Tồn kho tối thiểu
-                        </label>
+                        <label className={labelClass}>Số lượng tối thiểu</label>
                         <input
-                            type="number" min="0" value={form.minimum_stock} onChange={set("minimum_stock")}
-                            placeholder="VD: 10" className={inputClass} style={{ color: "var(--color-text-1)" }}
+                            type="number"
+                            min={0}
+                            value={form.minimum_stock}
+                            onChange={(e) =>
+                                setForm((f) => ({
+                                    ...f,
+                                    minimum_stock: e.target.value,
+                                }))
+                            }
+                            placeholder="0"
+                            className={inputClass}
                         />
+
                     </div>
                 </div>
 
-                <ModalActions onClose={onClose} onSave={handleSave} loading={loading} saveLabel="Thêm nguyên liệu" />
+                <ModalActions
+                    onClose={onClose}
+                    onSave={handleSave}
+                    loading={loading}
+                    saveLabel="Thêm nguyên liệu"
+                />
             </div>
         </Modal>
     );
 }
+
 
 // ─── UPDATE INGREDIENT MODAL ──────────────────────────────────────────────────
 function UpdateIngredientModal({ ingredient, onClose, onSave, categories }) {
@@ -339,12 +374,12 @@ function AddStockModal({ ingredient, onClose, onSave }) {
         setLoading(true);
         setError("");
         try {
-            // branchId: thay bằng ID branch thực tế nếu cần,
-            // hiện tại dùng ingredient_category_id như ví dụ API gốc
-            await addIngredientTransaction(ingredient.ingredient_category_id, {
+
+            await addIngredientTransaction(branchId, {
                 ingredient_id: ingredient.id,
                 quantity: String(quantity),
             });
+
             onSave({ ...ingredient, stock: ingredient.stock + parseFloat(quantity) });
             onClose();
         } catch (e) {
@@ -433,6 +468,9 @@ function ConfirmDeleteModal({ ingredient, onClose, onConfirm }) {
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function IngredientsPage() {
+    const token = localStorage.getItem("token");
+    const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+    const brandId = tokenPayload?.brandID ?? null;
     const [ingredients, setIngredients] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -444,15 +482,24 @@ export default function IngredientsPage() {
 
     const showToast = (message, type = "success") => setToast({ message, type });
 
+
+
+    console.log("token payload:", tokenPayload);
+    console.log("brand_id:", localStorage.getItem("brand_id"));
+    console.log("all keys:", Object.keys(localStorage));
     // ── Fetch ──────────────────────────────────────────────────────────────────
     const fetchIngredients = useCallback(async () => {
         setLoading(true);
         setFetchError("");
 
         try {
+
             const res = await getIngredients();
+            console.log("ingredients response:", res);
+            console.log("first item raw:", extractList(res)[0]);
 
             const list = extractList(res).map(mapIngredient);
+            console.log("mapped list:", list);
 
             setIngredients(list);
 
@@ -464,10 +511,7 @@ export default function IngredientsPage() {
             });
 
             setCategories(
-                Object.entries(catMap).map(([id, name]) => ({
-                    id,
-                    name,
-                }))
+                Object.entries(catMap).map(([id, name]) => ({ id, name }))
             );
         } catch (e) {
             setFetchError(e?.response?.data?.message ?? e.message);
@@ -501,7 +545,7 @@ export default function IngredientsPage() {
         showToast("Nhập kho thành công!");
     };
 
-    // ── Filter ─────────────────────────────────────────────────────────────────
+
     const uniqueCategories = [...new Set(ingredients.map((i) => i.category).filter((c) => c !== "—"))];
     const filtered = ingredients.filter((i) => {
         const matchSearch = i.name.toLowerCase().includes(search.toLowerCase());
@@ -593,7 +637,7 @@ export default function IngredientsPage() {
                             <table className="w-full text-left">
                                 <thead style={{ background: "#f8faf9" }}>
                                     <tr>
-                                        {["Tên nguyên liệu", "Danh mục", "Đơn vị", "Tồn kho", "Hành động"].map((h, i) => (
+                                        {["Tên nguyên liệu", "Danh mục", "Tồn kho", "Đơn vị", "Hành động"].map((h, i) => (
                                             <th key={h} className={thClass} style={{ color: "var(--color-text-3)", textAlign: i >= 3 ? "right" : "left" }}>{h}</th>
                                         ))}
                                     </tr>
@@ -602,8 +646,8 @@ export default function IngredientsPage() {
                                     {loading ? (
                                         Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
                                     ) : filtered.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={5} className="px-6 py-12 text-center text-sm" style={{ color: "var(--color-text-3)" }}>
+                                        <tr >
+                                            <td colSpan={5} className="px-6 py-12 text-center text-sm " style={{ color: "var(--color-text-3)" }}>
                                                 {fetchError ? "Không thể tải dữ liệu" : "Không tìm thấy nguyên liệu nào"}
                                             </td>
                                         </tr>
@@ -622,15 +666,15 @@ export default function IngredientsPage() {
                                                     {item.category}
                                                 </span>
                                             </td>
-                                            <td className={tdClass} style={{ color: "var(--color-text-2)", textAlign: "center" }}>{item.unit}</td>
                                             <td className={tdClass} style={{ textAlign: "right" }}>
-                                                <span className="font-bold inline-flex items-center gap-1" style={{ color: item.stock <= item.minimum_stock ? "#f97316" : "var(--color-primary)" }}>
+                                                <span className="font-bold inline-flex items-center gap-1 " style={{ color: item.stock <= item.minimum_stock ? "#f97316" : "var(--color-primary)" }}>
                                                     {item.stock}
                                                     {item.stock <= item.minimum_stock && (
                                                         <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#f97316" }} title="Sắp hết hàng">warning</span>
                                                     )}
                                                 </span>
                                             </td>
+                                            <td className={tdClass} style={{ color: "var(--color-text-2)", textAlign: "center" }}>{item.unit}</td>
                                             <td className={tdClass} style={{ textAlign: "right" }}>
                                                 <div className="flex justify-end gap-1.5">
                                                     <button onClick={() => setModal({ type: "addStock", item })} className="p-2 rounded-lg hover:bg-emerald-50 transition-colors" title="Nhập kho">
@@ -656,7 +700,9 @@ export default function IngredientsPage() {
 
             {/* ── Modals ── */}
             {modal === "add" && (
-                <AddIngredientModal onClose={() => setModal(null)} onSave={handleAdd} categories={categories} />
+
+                <AddIngredientModal onClose={() => setModal(null)} onSave={handleAdd} brandId={brandId} categories={categories} />
+
             )}
             {modal?.type === "update" && (
                 <UpdateIngredientModal ingredient={modal.item} onClose={() => setModal(null)} onSave={handleUpdate} categories={categories} />
