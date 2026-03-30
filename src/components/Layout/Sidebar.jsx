@@ -198,6 +198,21 @@ const Sidebar = () => {
                 >
                     <BarChart3 size={18} />
                     <span className="text-sm font-medium">
+                        Cảnh báo lãng phí
+                    </span>
+                </NavLink>
+
+                <NavLink
+                    to="/app/waste-base"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
+                        }`
+                    }
+                >
+                    <AlertTriangle size={18} />
+                    <span className="text-sm font-medium">
                         Báo cáo lãng phí
                     </span>
                 </NavLink>

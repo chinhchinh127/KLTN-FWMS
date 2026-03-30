@@ -25,6 +25,7 @@ import WasteReport from "./pages/kitchen/reports/WasteReport";
 import ReportExport from "./pages/kitchen/ReportExport";
 import KitchenRoute from "./components/KitchenRoute";
 import WasteAlert from "./components/WasteAlert";
+import WasteReportPage from "./components/WasteReportPage";
 function App() {
     return (
         <Router basename="/KLTN-FWMS">
@@ -47,6 +48,7 @@ function App() {
                     <Route path="foods" element={<FoodManager />} />
                     <Route path="ingredients" element={<IngredientManager />} />
                     <Route path="waste-report" element={<WasteAlert />} />
+                    <Route path="waste-base" element={<WasteReportPage />} />
                     <Route
                         path="accounts"
                         element={<Manager_Account_Staff />}
@@ -68,6 +70,8 @@ function App() {
                     <Route path="surplus-dishes" element={<SurplusDishes />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="waste-report" element={<WasteAlert />} />
+                    <Route path="waste-base" element={<WasteReportPage />} />
+                    
                 </Route>
             </Routes>
         </Router>
