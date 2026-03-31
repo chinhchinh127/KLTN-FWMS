@@ -1,14 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
-import { getIngredientCategories } from "../services/ingredientService";
+
+
 import {
     getIngredients,
     createIngredient,
     updateIngredient,
     deleteIngredient,
-    addIngredientTransaction,
+    addStock,
+    getIngredientById
 } from "../services/ingredientService";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
+
+
+
+
 const UNITS = ["kg", "lít", "gói", "hộp", "cái", "túi"];
 
 const BADGE_COLORS = [
@@ -29,9 +35,9 @@ function getCategoryBadge(name) {
     return categoryColorCache[name];
 }
 
-
 function mapIngredient(raw) {
     const stock = parseFloat(raw.current_stock);
+    const minimum = parseFloat(raw.minimum_stock ?? raw.minimumStock ?? 0);
 
     return {
         id: raw.id ?? raw._id,
@@ -41,21 +47,13 @@ function mapIngredient(raw) {
             raw.category_name ??
             raw.category ??
             "—",
-
         ingredient_category_id:
             raw.ingredient_category_id ??
             raw.ingredient_category?.id ??
             "",
-
         unit: raw.unit,
-
-        stock: isNaN(stock) ? 0 : stock,
-
-        minimum_stock: parseFloat(
-            raw.minimum_stock ??
-            raw.minimumStock ??
-            0
-        ),
+        current_stock: isNaN(stock) ? 0 : stock,
+        minimum_stock: isNaN(minimum) ? 0 : minimum,
     };
 }
 
@@ -177,8 +175,8 @@ function AddIngredientModal({ onClose, onSave, brandId, categories }) {
         ingredient_category_id: categories[0]?.id ?? "",
         unit: UNITS[0],
         minimum_stock: "",
+        current_stock: "",
     });
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -199,20 +197,15 @@ function AddIngredientModal({ onClose, onSave, brandId, categories }) {
                 ingredient_category_id: form.ingredient_category_id,
                 unit: form.unit,
                 minimum_stock: form.minimum_stock === "" ? null : Number(form.minimum_stock),
-
-                current_stock: 0,
+                current_stock: form.current_stock === "" ? 0 : Number(form.current_stock),
             };
-            console.log("payload:", payload);
-            console.log("brandId:", brandId);
 
             const res = await createIngredient(brandId, payload);
             const raw = res?.data ?? res;
-            console.log("raw response create =", raw);
+
             onSave(mapIngredient(raw));
             onClose();
-
         } catch (e) {
-            console.log("error full:", e?.response);
             setError(e?.response?.data?.message ?? e.message);
         } finally {
             setLoading(false);
@@ -251,7 +244,7 @@ function AddIngredientModal({ onClose, onSave, brandId, categories }) {
                     </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                     <div>
                         <label className={labelClass}>Đơn vị <span style={{ color: "#f87171" }}>*</span></label>
                         <select value={form.unit} onChange={set("unit")} className={inputClass}>
@@ -266,16 +259,21 @@ function AddIngredientModal({ onClose, onSave, brandId, categories }) {
                             type="number"
                             min={0}
                             value={form.minimum_stock}
-                            onChange={(e) =>
-                                setForm((f) => ({
-                                    ...f,
-                                    minimum_stock: e.target.value,
-                                }))
-                            }
+                            onChange={(e) => setForm((f) => ({ ...f, minimum_stock: e.target.value }))}
                             placeholder="0"
                             className={inputClass}
                         />
-
+                    </div>
+                    <div>
+                        <label className={labelClass}>Số lượng tồn kho</label>
+                        <input
+                            type="number"
+                            min={0}
+                            value={form.current_stock}
+                            onChange={(e) => setForm((f) => ({ ...f, current_stock: e.target.value }))}
+                            placeholder="0"
+                            className={inputClass}
+                        />
                     </div>
                 </div>
 
@@ -289,7 +287,6 @@ function AddIngredientModal({ onClose, onSave, brandId, categories }) {
         </Modal>
     );
 }
-
 
 // ─── UPDATE INGREDIENT MODAL ──────────────────────────────────────────────────
 function UpdateIngredientModal({ ingredient, onClose, onSave, categories }) {
@@ -308,14 +305,16 @@ function UpdateIngredientModal({ ingredient, onClose, onSave, categories }) {
         setLoading(true);
         setError("");
         try {
-            const res = await updateIngredient(ingredient.id, {
+
+            await updateIngredient(ingredient.id, {
                 name: form.name,
                 unit: form.unit,
                 minimum_stock: form.minimum_stock,
                 ingredient_category_id: form.ingredient_category_id,
             });
-            const raw = res?.data ?? { ...ingredient, ...form };
-            onSave(mapIngredient(raw));
+
+
+            onSave(mapIngredient({ ...ingredient, ...form }));
             onClose();
         } catch (e) {
             setError(e?.response?.data?.message ?? e.message);
@@ -341,7 +340,7 @@ function UpdateIngredientModal({ ingredient, onClose, onSave, categories }) {
                     </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                     <div>
                         <label className={labelClass} style={{ color: "var(--color-text-3)" }}>Đơn vị</label>
                         <select value={form.unit} onChange={set("unit")} className={inputClass} style={{ color: "var(--color-text-1)" }}>
@@ -362,58 +361,132 @@ function UpdateIngredientModal({ ingredient, onClose, onSave, categories }) {
 
 // ─── ADD STOCK MODAL ──────────────────────────────────────────────────────────
 function AddStockModal({ ingredient, onClose, onSave }) {
+    // Lấy cả userId và tên người dùng
+    const getUserData = () => {
+        let userId = null;
+        let fullName = "Người dùng";
+
+        // Cách 1: Từ getUserInfo() - ưu tiên
+        if (typeof getUserInfo === "function") {
+            const info = getUserInfo();
+            if (info) {
+                userId = info.userId || info.id;
+                fullName = info.name || info.fullName || info.username || "Người dùng";
+                return { userId, fullName };
+            }
+        }
+
+        // Cách 2: Fallback từ JWT token
+        try {
+            const token = localStorage.getItem("token");
+            if (token) {
+                const payload = JSON.parse(atob(token.split(".")[1]));
+                userId = payload?.userId || payload?.id || payload?.user_id;
+                fullName = payload?.name || payload?.fullName || "Người dùng";
+            }
+        } catch (e) {
+            console.error("Lỗi parse token:", e);
+        }
+
+        return { userId, fullName };
+    };
+
+    const { userId, fullName } = getUserData();
+
     const [quantity, setQuantity] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    console.log("🔍 AddStockModal - userId:", userId, "| Tên:", fullName);
+
     const handleSave = async () => {
-        if (!quantity || parseFloat(quantity) <= 0) {
-            setError("Vui lòng nhập số lượng hợp lệ.");
+        setError("");
+
+        if (!userId) {
+            setError("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
             return;
         }
+
+        if (!ingredient?.id) {
+            setError("Nguyên liệu không hợp lệ.");
+            return;
+        }
+
+        const qtyNumber = parseFloat(quantity);
+        if (!quantity || isNaN(qtyNumber) || qtyNumber <= 0) {
+            setError("Vui lòng nhập số lượng hợp lệ (> 0).");
+            return;
+        }
+
         setLoading(true);
         setError("");
-        try {
 
-            await addIngredientTransaction(branchId, {
+        try {
+            await addStock(userId, {
                 ingredient_id: ingredient.id,
-                quantity: String(quantity),
+                quantity: qtyNumber.toString(),
             });
 
-            onSave({ ...ingredient, stock: ingredient.stock + parseFloat(quantity) });
+            onSave({
+                ...ingredient,
+                current_stock: (Number(ingredient.current_stock) || 0) + qtyNumber,
+            });
+
+            console.log("✅ Nhập kho thành công bởi:", fullName);
             onClose();
         } catch (e) {
-            setError(e?.response?.data?.message ?? e.message);
+            console.error("❌ Lỗi nhập kho:", e?.response?.data || e);
+            setError(e?.response?.data?.message || "Đã xảy ra lỗi khi nhập kho.");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <Modal title={`Nhập kho: ${ingredient.name}`} onClose={onClose}>
-            <div className="space-y-4" style={{ fontFamily: "'Nunito', sans-serif" }}>
+        <Modal title={`Nhập kho: ${ingredient?.name || "Nguyên liệu"}`} onClose={onClose}>
+            <div className="space-y-4">
                 {error && <ErrorBox message={error} />}
 
+                {/* Hiển thị tên người dùng đẹp hơn */}
+                {userId && (
+                    <div className="text-xs text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>person</span>
+                        Người thực hiện: <strong>{fullName}</strong>
+                    </div>
+                )}
+
                 <div className="bg-slate-50 rounded-xl p-4 flex items-center justify-between">
-                    <span className="text-sm" style={{ color: "var(--color-text-3)" }}>Tồn kho hiện tại</span>
+                    <span className="text-sm" style={{ color: "var(--color-text-3)" }}>
+                        Tồn kho hiện tại
+                    </span>
                     <span className="font-bold text-lg" style={{ color: "var(--color-primary)" }}>
-                        {ingredient.stock} {ingredient.unit}
+                        {ingredient?.current_stock || 0} {ingredient?.unit || ""}
                     </span>
                 </div>
 
                 <div>
                     <label className={labelClass} style={{ color: "var(--color-text-3)" }}>
-                        Số lượng nhập thêm ({ingredient.unit}) <span className="text-red-400">*</span>
+                        Số lượng nhập thêm ({ingredient?.unit || "đơn vị"}) <span className="text-red-400">*</span>
                     </label>
                     <input
-                        type="number" min="0" step="0.1"
-                        value={quantity} onChange={(e) => setQuantity(e.target.value)}
-                        placeholder="VD: 20" className={inputClass}
-                        style={{ color: "var(--color-text-1)" }} autoFocus
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={quantity}
+                        onChange={(e) => setQuantity(e.target.value)}
+                        placeholder="VD: 20"
+                        className={inputClass}
+                        style={{ color: "var(--color-text-1)" }}
+                        autoFocus
                     />
                 </div>
 
-                <ModalActions onClose={onClose} onSave={handleSave} loading={loading} saveLabel="Xác nhận nhập kho" />
+                <ModalActions
+                    onClose={onClose}
+                    onSave={handleSave}
+                    loading={loading}
+                    saveLabel="Xác nhận nhập kho"
+                />
             </div>
         </Modal>
     );
@@ -469,8 +542,20 @@ function ConfirmDeleteModal({ ingredient, onClose, onConfirm }) {
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function IngredientsPage() {
     const token = localStorage.getItem("token");
-    const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-    const brandId = tokenPayload?.brandID ?? null;
+    const tokenPayload = token ? JSON.parse(atob(token.split(".")[1])) : {};
+
+    const brandId =
+        tokenPayload?.brandID ||
+        tokenPayload?.brandId ||
+        tokenPayload?.brand_id ||
+        null;
+
+    const branchId =
+        tokenPayload?.branchID ||
+        tokenPayload?.branchId ||
+        tokenPayload?.branch_id ||
+        null;
+
     const [ingredients, setIngredients] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -482,44 +567,34 @@ export default function IngredientsPage() {
 
     const showToast = (message, type = "success") => setToast({ message, type });
 
-
-
-    console.log("token payload:", tokenPayload);
-    console.log("brand_id:", localStorage.getItem("brand_id"));
-    console.log("all keys:", Object.keys(localStorage));
     // ── Fetch ──────────────────────────────────────────────────────────────────
     const fetchIngredients = useCallback(async () => {
         setLoading(true);
         setFetchError("");
-
         try {
 
             const res = await getIngredients();
-            console.log("ingredients response:", res);
-            console.log("first item raw:", extractList(res)[0]);
-
-            const list = extractList(res).map(mapIngredient);
-            console.log("mapped list:", list);
-
+            const rawList = extractList(res);
+            const list = rawList.map(mapIngredient);
             setIngredients(list);
 
-            const catMap = {};
-            list.forEach((i) => {
-                if (i.ingredient_category_id && i.category !== "—") {
-                    catMap[i.ingredient_category_id] = i.category;
+
+            const seen = new Set();
+            const cats = [];
+            rawList.forEach((item) => {
+                const cat = item.ingredient_category;
+                if (cat?.id && !seen.has(cat.id)) {
+                    seen.add(cat.id);
+                    cats.push({ id: cat.id, name: cat.name });
                 }
             });
-
-            setCategories(
-                Object.entries(catMap).map(([id, name]) => ({ id, name }))
-            );
+            setCategories(cats);
         } catch (e) {
             setFetchError(e?.response?.data?.message ?? e.message);
         } finally {
             setLoading(false);
         }
     }, []);
-
 
     useEffect(() => { fetchIngredients(); }, [fetchIngredients]);
 
@@ -535,7 +610,7 @@ export default function IngredientsPage() {
     };
 
     const handleDelete = async (id) => {
-        await deleteIngredient(id); // throws nếu lỗi → ConfirmDeleteModal bắt
+        await deleteIngredient(id);
         setIngredients((prev) => prev.filter((i) => i.id !== id));
         showToast("Đã xóa nguyên liệu.");
     };
@@ -544,7 +619,6 @@ export default function IngredientsPage() {
         setIngredients((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
         showToast("Nhập kho thành công!");
     };
-
 
     const uniqueCategories = [...new Set(ingredients.map((i) => i.category).filter((c) => c !== "—"))];
     const filtered = ingredients.filter((i) => {
@@ -564,151 +638,161 @@ export default function IngredientsPage() {
                 select { appearance: auto; }
             `}</style>
 
-            <div className="min-h-screen" style={{ background: "#f6f8f7", fontFamily: "'Nunito', sans-serif" }}>
-
-                {/* ── Header ── */}
-                <header className="bg-white border-b border-slate-200 px-8 h-20 flex items-center justify-between sticky top-0 z-10">
-                    <h2 style={{ fontFamily: "'Arimo', sans-serif", fontSize: 22, fontWeight: 700, color: "var(--color-text-1)", margin: 0 }}>
-                        Quản lý nguyên liệu
-                    </h2>
-                    <div className="flex gap-3">
-                        <button
-                            onClick={fetchIngredients}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-all hover:opacity-80"
-                            style={{ borderColor: "var(--color-text-4)", color: "var(--color-text-2)" }}
-                            title="Làm mới"
-                        >
-                            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>refresh</span>
-                        </button>
-                        <button
-                            onClick={() => setModal("add")}
-                            className="flex items-center gap-2 px-5 py-2.5 text-white rounded-xl text-sm font-bold hover:opacity-90 active:scale-95 transition-all"
-                            style={{ background: "linear-gradient(135deg, var(--color-primary), #0da04f)", boxShadow: "0 4px 12px rgba(16,188,93,0.25)" }}
-                        >
-                            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>add</span>
-                            Thêm nguyên liệu mới
-                        </button>
-                    </div>
-                </header>
-
-                <div className="p-8 space-y-8 max-w-6xl mx-auto">
-
-                    {/* ── Fetch Error Banner ── */}
-                    {fetchError && (
-                        <div className="bg-red-50 text-red-600 text-sm px-5 py-3.5 rounded-xl border border-red-100 flex items-center gap-3">
-                            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>error</span>
-                            Lỗi tải dữ liệu: {fetchError}
-                            <button onClick={fetchIngredients} className="ml-auto font-bold underline">Thử lại</button>
+            <div className="flex  min-h-screen  pl-8" style={{ background: "#f6f8f7", fontFamily: "'Nunito', sans-serif" }}>
+                <main className="flex-1 flex flex-col min-w-0">
+                    {/* ── Header ── */}
+                    <header className="bg-white border-b border-slate-200 px-8 h-20 flex items-center justify-between sticky top-0 z-10">
+                        <h2 style={{ fontFamily: "'Arimo', sans-serif", fontSize: 22, fontWeight: 700, color: "var(--color-text-1)", margin: 0 }}>
+                            Quản lý nguyên liệu
+                        </h2>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={fetchIngredients}
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-all hover:opacity-80"
+                                style={{ borderColor: "var(--color-text-4)", color: "var(--color-text-2)" }}
+                                title="Làm mới"
+                            >
+                                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>refresh</span>
+                            </button>
+                            <button
+                                onClick={() => setModal("add")}
+                                className="flex items-center gap-2 px-5 py-2.5 text-white rounded-xl text-sm font-bold hover:opacity-90 active:scale-95 transition-all"
+                                style={{ background: "linear-gradient(135deg, var(--color-primary), #0da04f)", boxShadow: "0 4px 12px rgba(16,188,93,0.25)" }}
+                            >
+                                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>add</span>
+                                Thêm nguyên liệu mới
+                            </button>
                         </div>
-                    )}
+                    </header>
 
-                    {/* ── Search & Filter ── */}
-                    <section className="bg-white rounded-xl border border-slate-200 p-4 flex flex-wrap gap-4 items-center">
-                        <div className="flex-1 min-w-64 relative">
-                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: "var(--color-text-3)" }}>search</span>
-                            <input
-                                type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Tìm kiếm tên nguyên liệu..."
-                                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 rounded-xl text-sm focus:outline-none border border-transparent focus:border-green-300 transition-all"
-                                style={{ color: "var(--color-text-1)" }}
-                            />
-                        </div>
-                        <select
-                            value={filterCat} onChange={(e) => setFilterCat(e.target.value)}
-                            className="bg-slate-50 border border-transparent focus:border-green-300 text-sm rounded-xl px-4 py-2.5 focus:outline-none transition-all"
-                            style={{ color: "var(--color-text-2)" }}
-                        >
-                            <option value="">Tất cả danh mục</option>
-                            {uniqueCategories.map((c) => <option key={c}>{c}</option>)}
-                        </select>
-                    </section>
+                    <div className="p-8 space-y-8 max-w-7xl mx-auto w-full ">
 
-                    {/* ── Table ── */}
-                    <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                            <h3 style={{ fontFamily: "'Arimo', sans-serif", fontWeight: 700, color: "var(--color-text-1)", margin: 0 }}>
-                                Danh sách nguyên liệu
-                            </h3>
-                            <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(16,188,93,0.1)", color: "var(--color-primary)" }}>
-                                {loading ? "..." : `${filtered.length} mục`}
-                            </span>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead style={{ background: "#f8faf9" }}>
-                                    <tr>
-                                        {["Tên nguyên liệu", "Danh mục", "Tồn kho", "Đơn vị", "Hành động"].map((h, i) => (
-                                            <th key={h} className={thClass} style={{ color: "var(--color-text-3)", textAlign: i >= 3 ? "right" : "left" }}>{h}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {loading ? (
-                                        Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
-                                    ) : filtered.length === 0 ? (
-                                        <tr >
-                                            <td colSpan={5} className="px-6 py-12 text-center text-sm " style={{ color: "var(--color-text-3)" }}>
-                                                {fetchError ? "Không thể tải dữ liệu" : "Không tìm thấy nguyên liệu nào"}
-                                            </td>
+                        {/* ── Fetch Error Banner ── */}
+                        {fetchError && (
+                            <div className="bg-red-50 text-red-600 text-sm px-5 py-3.5 rounded-xl border border-red-100 flex items-center gap-3">
+                                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>error</span>
+                                Lỗi tải dữ liệu: {fetchError}
+                                <button onClick={fetchIngredients} className="ml-auto font-bold underline">Thử lại</button>
+                            </div>
+                        )}
+
+                        {/* ── Search & Filter ── */}
+                        <section className="bg-white rounded-xl border border-slate-200 p-4 flex flex-wrap gap-4 items-center">
+                            <div className="flex-1 min-w-64 relative">
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: "var(--color-text-3)" }}>search</span>
+                                <input
+                                    type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Tìm kiếm tên nguyên liệu..."
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 rounded-xl text-sm focus:outline-none border border-transparent focus:border-green-300 transition-all"
+                                    style={{ color: "var(--color-text-1)" }}
+                                />
+                            </div>
+                            <select
+                                value={filterCat} onChange={(e) => setFilterCat(e.target.value)}
+                                className="bg-slate-50 border border-transparent focus:border-green-300 text-sm rounded-xl px-4 py-2.5 focus:outline-none transition-all"
+                                style={{ color: "var(--color-text-2)" }}
+                            >
+                                <option value="">Tất cả danh mục</option>
+                                {uniqueCategories.map((c) => <option key={c}>{c}</option>)}
+                            </select>
+                        </section>
+
+                        {/* ── Table ── */}
+                        <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                                <h3 style={{ fontFamily: "'Arimo', sans-serif", fontWeight: 700, color: "var(--color-text-1)", margin: 0 }}>
+                                    Danh sách nguyên liệu
+                                </h3>
+                                <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(16,188,93,0.1)", color: "var(--color-primary)" }}>
+                                    {loading ? "..." : `${filtered.length} mục`}
+                                </span>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead style={{ background: "#f8faf9" }}>
+                                        <tr>
+                                            {["Tên nguyên liệu", "Danh mục", "Tồn kho", "Tối thiểu", "Đơn vị", "Hành động"].map((h, i) => (
+                                                <th key={h} className={thClass} style={{
+                                                    color: "var(--color-text-3)",
+                                                    textAlign: i >= 2 ? "right" : "left"
+                                                }}>{h}</th>
+                                            ))}
                                         </tr>
-                                    ) : filtered.map((item) => (
-                                        <tr key={item.id} className="hover:bg-slate-50/60 transition-colors" style={{ borderTop: "1px solid #f1f5f2" }}>
-                                            <td className={tdClass}>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(16,188,93,0.1)" }}>
-                                                        <span className="material-symbols-outlined" style={{ fontSize: 16, color: "var(--color-primary)" }}>nutrition</span>
+                                    </thead>
+                                    <tbody>
+                                        {loading ? (
+                                            Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
+                                        ) : filtered.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={6} className="px-6 py-12 text-center text-sm" style={{ color: "var(--color-text-3)" }}>
+                                                    {fetchError ? "Không thể tải dữ liệu" : "Không tìm thấy nguyên liệu nào"}
+                                                </td>
+                                            </tr>
+                                        ) : filtered.map((item) => (
+                                            <tr key={item.id} className="hover:bg-slate-50/60 transition-colors" style={{ borderTop: "1px solid #f1f5f2" }}>
+                                                <td className={tdClass}>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(16,188,93,0.1)" }}>
+                                                            <span className="material-symbols-outlined" style={{ fontSize: 16, color: "var(--color-primary)" }}>nutrition</span>
+                                                        </div>
+                                                        <span className="font-semibold" style={{ color: "var(--color-text-1)" }}>{item.name}</span>
                                                     </div>
-                                                    <span className="font-semibold" style={{ color: "var(--color-text-1)" }}>{item.name}</span>
-                                                </div>
-                                            </td>
-                                            <td className={tdClass}>
-                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${getCategoryBadge(item.category)}`}>
-                                                    {item.category}
-                                                </span>
-                                            </td>
-                                            <td className={tdClass} style={{ textAlign: "right" }}>
-                                                <span className="font-bold inline-flex items-center gap-1 " style={{ color: item.stock <= item.minimum_stock ? "#f97316" : "var(--color-primary)" }}>
-                                                    {item.stock}
-                                                    {item.stock <= item.minimum_stock && (
-                                                        <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#f97316" }} title="Sắp hết hàng">warning</span>
-                                                    )}
-                                                </span>
-                                            </td>
-                                            <td className={tdClass} style={{ color: "var(--color-text-2)", textAlign: "center" }}>{item.unit}</td>
-                                            <td className={tdClass} style={{ textAlign: "right" }}>
-                                                <div className="flex justify-end gap-1.5">
-                                                    <button onClick={() => setModal({ type: "addStock", item })} className="p-2 rounded-lg hover:bg-emerald-50 transition-colors" title="Nhập kho">
-                                                        <span className="material-symbols-outlined" style={{ fontSize: 18, color: "var(--color-primary)" }}>add_box</span>
-                                                    </button>
-                                                    <button onClick={() => setModal({ type: "update", item })} className="p-2 rounded-lg hover:bg-slate-100 transition-colors" title="Chỉnh sửa">
-                                                        <span className="material-symbols-outlined" style={{ fontSize: 18, color: "var(--color-text-3)" }}>edit</span>
-                                                    </button>
-                                                    <button onClick={() => setModal({ type: "delete", item })} className="p-2 rounded-lg hover:bg-red-50 transition-colors" title="Xóa">
-                                                        <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#f87171" }}>delete</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
+                                                </td>
+                                                <td className={tdClass}>
+                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${getCategoryBadge(item.category)}`}>
+                                                        {item.category}
+                                                    </span>
+                                                </td>
+                                                <td className={tdClass} style={{ textAlign: "right" }}>
+                                                    <span className="font-bold inline-flex items-center gap-1" style={{ color: item.current_stock <= item.minimum_stock ? "#f97316" : "var(--color-primary)" }}>
+                                                        {Number(item.current_stock).toFixed(2)}
+                                                        {item.current_stock <= item.minimum_stock && (
+                                                            <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#f97316" }} title="Sắp hết hàng">warning</span>
+                                                        )}
+                                                    </span>
+                                                </td>
+                                                <td className={tdClass} style={{ textAlign: "center", color: "var(--color-text-2)" }}>
+                                                    {Number(item.minimum_stock).toFixed(2)}
+                                                </td>
+                                                <td className={tdClass} style={{ color: "var(--color-text-2)", textAlign: "center" }}>{item.unit}</td>
+                                                <td className={tdClass} style={{ textAlign: "right" }}>
+                                                    <div className="flex justify-end gap-1.5">
+                                                        <button onClick={() => setModal({ type: "addStock", item })} className="p-2 rounded-lg hover:bg-emerald-50 transition-colors" title="Nhập kho">
+                                                            <span className="material-symbols-outlined" style={{ fontSize: 18, color: "var(--color-primary)" }}>add_box</span>
+                                                        </button>
+                                                        <button onClick={() => setModal({ type: "update", item })} className="p-2 rounded-lg hover:bg-slate-100 transition-colors" title="Chỉnh sửa">
+                                                            <span className="material-symbols-outlined" style={{ fontSize: 18, color: "var(--color-text-3)" }}>edit</span>
+                                                        </button>
+                                                        <button onClick={() => setModal({ type: "delete", item })} className="p-2 rounded-lg hover:bg-red-50 transition-colors" title="Xóa">
+                                                            <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#f87171" }}>delete</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
 
-                </div>
+                    </div>
+                </main>
+
             </div>
 
             {/* ── Modals ── */}
             {modal === "add" && (
-
                 <AddIngredientModal onClose={() => setModal(null)} onSave={handleAdd} brandId={brandId} categories={categories} />
-
             )}
             {modal?.type === "update" && (
                 <UpdateIngredientModal ingredient={modal.item} onClose={() => setModal(null)} onSave={handleUpdate} categories={categories} />
             )}
-            {modal?.type === "addStock" && (
-                <AddStockModal ingredient={modal.item} onClose={() => setModal(null)} onSave={handleStockUpdate} />
+            {modal?.type === "addStock" && modal.item && (
+                <AddStockModal
+                    ingredient={modal.item}
+                    onClose={() => setModal(null)}
+                    onSave={handleStockUpdate}
+                />
             )}
             {modal?.type === "delete" && (
                 <ConfirmDeleteModal ingredient={modal.item} onClose={() => setModal(null)} onConfirm={handleDelete} />
