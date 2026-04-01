@@ -28,7 +28,7 @@ import Manager_Account_Staff from "./pages/Manager_Account_Staff";
 
 // Kitchen Pages
 import KitchenDashboard from "./pages/kitchen/KitchenDashboard";
-import SurplusDishes from "./pages/kitchen/SurplusDishes";
+import SurplusDishes from "./pages/kitchen/SurplusDishes/SurplusDishes";
 import ProfilePage from "./pages/kitchen/ProfilePage";
 
 // Components
@@ -49,7 +49,6 @@ function App() {
 
             <Router basename="/KLTN-FWMS">
                 <Routes>
-
                     {/* Auth */}
                     <Route path="/" element={<Login />} />
                     <Route path="/register" element={<Register />} />
@@ -67,12 +66,24 @@ function App() {
                         <Route path="customers" element={<Customers />} />
                         <Route path="food-data" element={<FoodData />} />
                         <Route path="foods" element={<FoodManager />} />
-                        <Route path="ingredients" element={<IngredientManager />} />
-                        <Route path="accounts" element={<Manager_Account_Staff />} />
+                        <Route
+                            path="ingredients"
+                            element={<IngredientManager />}
+                        />
+                        <Route
+                            path="accounts"
+                            element={<Manager_Account_Staff />}
+                        />
                         <Route path="revenue" element={<Revenue />} />
-                        <Route path="waste-history" element={<WasteHistory />} />
+                        <Route
+                            path="waste-history"
+                            element={<WasteHistory />}
+                        />
                         <Route path="waste-report" element={<WasteAlert />} />
-                        <Route path="waste-base" element={<WasteReportPage />} />
+                        <Route
+                            path="waste-base"
+                            element={<WasteReportPage />}
+                        />
                     </Route>
 
                     {/* Kitchen */}
@@ -85,10 +96,16 @@ function App() {
                         }
                     >
                         <Route index element={<KitchenDashboard />} />
-                        <Route path="surplus-dishes" element={<SurplusDishes />} />
+                        <Route
+                            path="surplus-dishes"
+                            element={<SurplusDishes />}
+                        />
                         <Route path="profile" element={<ProfilePage />} />
                         <Route path="waste-report" element={<WasteAlert />} />
-                        <Route path="waste-base" element={<WasteReportPage />} />
+                        <Route
+                            path="waste-base"
+                            element={<WasteReportPage />}
+                        />
                     </Route>
 
                     {/* Admin */}
@@ -102,7 +119,6 @@ function App() {
                     >
                         <Route path="dashboard" element={<AdminDashboard />} />
                     </Route>
-
                 </Routes>
 
                 {/* Global Widget */}

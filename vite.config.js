@@ -10,11 +10,11 @@ export default defineConfig({
                 target: "https://wasteless-ai.onrender.com",
                 changeOrigin: true,
                 secure: false,
-                rewrite: (path) => path.replace(/^\/api/, ""), 
+                // rewrite: (path) => path.replace(/^\/api/, ""),
             },
         },
     },
-   
+
     esbuild: {
         loader: "jsx",
         include: /src\/.*\.jsx?$/,
