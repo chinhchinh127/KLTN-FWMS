@@ -35,11 +35,10 @@ const WasteReportPage = () => {
   return (
     <div className="ml-10 p-5 bg-[#F6F8FA] min-h-screen">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6">       
         <h1 className="text-2xl font-bold text-[#141C21]">
           Báo cáo Phân tích Lãng phí
         </h1>
-
         <input
           placeholder="Tìm kiếm dữ liệu..."
           className="px-4 py-2 border rounded-lg text-sm outline-none"
@@ -54,6 +53,7 @@ const WasteReportPage = () => {
           </p>
           <h2 className="text-2xl font-bold">
             {summary.totalWaste || 0} kg
+            
           </h2>
           <p className="text-green-500 text-xs mt-1">
             +12% vs tháng trước
@@ -163,6 +163,7 @@ const WasteReportPage = () => {
           <h3 className="font-semibold mb-4">
             Lý do lãng phí chính
           </h3>
+
 
           <div className="w-full h-52">
             <ResponsiveContainer>

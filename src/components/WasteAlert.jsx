@@ -124,7 +124,7 @@ const WasteAlert = () => {
                 Thực tế
               </span>
               <span className="flex items-center">
-                <span className="w-2 h-2 bg-gray-300 rounded-full mr-2"></span>
+                <span className="w-2 h-2 bg-green-300 rounded-full mr-2"></span>
                 Ngưỡng an toàn
               </span>
             </div>
@@ -149,7 +149,7 @@ const WasteAlert = () => {
                 <Line
                   type="monotone"
                   dataKey="safe"
-                  stroke="#cbd5e1"
+                  stroke="#1a943d"
                   strokeDasharray="5 5"
                   dot={false}
                 />
