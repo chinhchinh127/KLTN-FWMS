@@ -40,6 +40,7 @@ import { AdminDashboard } from "./pages/Admin/AdminDashboard";
 
 // Widget
 import ChatWidget from "./components/ChatWidget";
+import Manager_Dish_Kitchen from "./pages/kitchen/ServedDishes/Manager_Dish_Kitchen";
 
 function App() {
     const token = localStorage.getItem("token");
@@ -89,6 +90,7 @@ function App() {
                         <Route path="profile" element={<ProfilePage />} />
                         <Route path="waste-report" element={<WasteAlert />} />
                         <Route path="waste-base" element={<WasteReportPage />} />
+                        <Route path="manager-dish" element={<Manager_Dish_Kitchen/>} />
                     </Route>
 
                     {/* Admin */}
@@ -106,7 +108,7 @@ function App() {
                 </Routes>
 
                 {/* Global Widget */}
-                {!token && <ChatWidget />}
+                {!token && <ChatWidget/>}
             </Router>
         </>
     );

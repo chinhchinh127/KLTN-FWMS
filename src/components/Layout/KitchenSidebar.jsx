@@ -192,6 +192,22 @@ const KitchenSidebar = () => {
                         Cảnh báo lãng phí
                     </span>
                 </NavLink>
+
+                <NavLink
+                    to="/kitchen/manager-dish"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
+                        }`
+                    }
+                >
+                    <BarChart3 size={18} />
+                    <span className="text-sm font-medium">
+                        Quản lý món ăn
+                    </span>
+                </NavLink>
+
                 <NavLink
                     to="/kitchen/waste-base"
                     className={({ isActive }) =>

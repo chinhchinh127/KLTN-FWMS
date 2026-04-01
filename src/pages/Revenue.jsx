@@ -92,7 +92,7 @@ const Revenue = () => {
             {/* Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-white p-5 rounded-xl shadow">
-                    <p className="text-gray-500 text-sm">Hôm nay</p>
+                    <p className="text-gray-500 text-sm">Hôm qua</p>
                     <h2 className="text-2xl font-bold mt-1">
                         {formatMoney(stats.today)}
                     </h2>
