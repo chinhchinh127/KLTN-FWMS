@@ -119,7 +119,7 @@ function App() {
                 </Routes>
 
                 {/* Global Widget */}
-                {!token && <ChatWidget/>}
+                {token && <ChatWidget/>}
             </Router>
         </>
     );
