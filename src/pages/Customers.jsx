@@ -19,6 +19,19 @@ const Customers = () => {
         fetchCustomers();
     }, []);
 
+    const formatDate = (row) => {
+        const rawDate =
+            row.operation_date || row.date || row.createdAt || row.day;
+
+        if (!rawDate) return "Không hợp lệ";
+
+        if (!isNaN(Date.parse(rawDate))) {
+            return new Date(rawDate).toLocaleDateString("vi-VN");
+        }
+
+        return "Không hợp lệ";
+    };
+
     // 👉 API 1: Stats
     const fetchSummary = async () => {
         try {
@@ -44,7 +57,6 @@ const Customers = () => {
             setLoadingSummary(false);
         }
     };
-
     // 👉 API 2: Table
     const fetchCustomers = async () => {
         try {
@@ -61,8 +73,10 @@ const Customers = () => {
 
             const data = await res.json();
 
+            console.log("DATA TABLE:", data.data); 
+
             if (data.success) {
-                setCustomerData(data.data);
+                setCustomerData(data.data || []);
             }
         } catch (error) {
             console.error("Lỗi table:", error);
@@ -102,18 +116,17 @@ const Customers = () => {
                     </span>
 
                     <span
-                        className={`text-sm px-4 py-2 rounded-full font-medium ${
-                            summary.percentage_change >= 0
+                        className={`text-sm px-4 py-2 rounded-full font-medium ${summary.percentage_change >= 0
                                 ? "text-[#10BC5D] bg-green-50"
                                 : "text-red-500 bg-red-50"
-                        }`}
+                            }`}
                     >
                         {summary.percentage_change}% so với tháng trước
                     </span>
                 </div>
             </div>
 
-            {/* Filter (chưa xử lý logic) */}
+            {/* Filter */}
             <div className="flex items-center gap-4 mb-6">
                 <span className="text-sm text-[#8B8B8B] font-medium">
                     Thời gian:
@@ -135,13 +148,13 @@ const Customers = () => {
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
                             <th className="text-left py-4 px-5 text-sm font-bold text-[#3D3D3D]">
-                                NGÀY
+                                Ngày
                             </th>
                             <th className="text-left py-4 px-5 text-sm font-bold text-[#3D3D3D]">
-                                SỐ LƯỢNG KHÁCH
+                                Số Lượng Khách
                             </th>
                             <th className="text-left py-4 px-5 text-sm font-bold text-[#3D3D3D]">
-                                GHI CHÚ
+                                Doanh Thu
                             </th>
                         </tr>
                     </thead>
@@ -166,15 +179,17 @@ const Customers = () => {
                                     className="border-b border-gray-100 hover:bg-gray-50"
                                 >
                                     <td className="py-4 px-5 text-sm text-[#141C21]">
-                                        {new Date(row.date).toLocaleDateString("vi-VN")}
+                                        {formatDate(row)}
                                     </td>
 
                                     <td className="py-4 px-5 text-sm text-[#141C21] font-medium">
-                                        {row.quantity || row.customer_count}
+                                        {row.quantity ??
+                                            row.customer_count ??
+                                            0}
                                     </td>
 
-                                    <td className="py-4 px-5 text-sm text-[#8B8B8B]">
-                                        {row.note || "-"}
+                                    <td className="py-4 px-5 text-sm text-[#141C21]">
+                                        {row.total_revenue || "-"}
                                     </td>
                                 </tr>
                             ))
@@ -183,7 +198,7 @@ const Customers = () => {
                 </table>
             </div>
 
-            {/* Pagination (chưa xử lý thật) */}
+            {/* Footer */}
             <div className="flex items-center justify-between">
                 <p className="text-sm text-[#8B8B8B]">
                     Hiển thị {customerData.length} bản ghi
