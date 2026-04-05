@@ -23,10 +23,13 @@ function Login() {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            console.log("ku đù");
-            
+            const clearnForm = {
+                email: form.email.trim(),
+                password: form.password,
+            }
+                        
             const res = await axios.post("https://wasteless-ai.onrender.com/api/auth/login",
-                form
+                clearnForm
             );
             const token = res.data.data;
             console.log(token);

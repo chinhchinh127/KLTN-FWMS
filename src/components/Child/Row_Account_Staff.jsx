@@ -28,7 +28,7 @@ export const Row_Account_Staff = () => {
             }
         };
         fetchUser();
-    }, []);
+    }, [token]);
 
     useEffect(() => {
         if (openform_changekitchen) {
@@ -77,7 +77,13 @@ export const Row_Account_Staff = () => {
             !dataUpdate.password) {
             return toast.warning("Không có gì thay đổi!");
         }
+
+        
         if (openform_changekitchen) {
+            if(openform_changekitchen.status == false){
+                toast.error("Không thể sửa tài khoản đã bị khóa!");
+                return;
+            }
             try {
                 const res = await axios.put(`https://wasteless-ai.onrender.com/api/users/update-kitchen/${openform_changekitchen.id}`,
                     form_ChangeUser,
@@ -87,13 +93,13 @@ export const Row_Account_Staff = () => {
                         },
                     }
                 );
-                alert("Sửa thông tin thành công");
+                toast.success("Sửa thông tin thành công!");
                 window.location.reload();
             } catch (error) {
                 console.log(error);
             }
         } else {
-            alert("Lỗi");
+            toast.error("Lỗi! Sửa thông tin không thành công");
         }
     }
 
@@ -268,7 +274,7 @@ export const Row_Account_Staff = () => {
                                                         />
                                                     </div>
                                                     {/* Password */}
-                                                    <div className="flex flex-col gap-1.5">
+                                                    {/* <div className="flex flex-col gap-1.5">
                                                         <label className="label-style">Mật khẩu mới</label>
                                                         <div className="relative">
                                                             <input
@@ -287,7 +293,7 @@ export const Row_Account_Staff = () => {
                                                                 <span className="material-symbols-outlined text-[20px]">visibility</span>
                                                             </button>
                                                         </div>
-                                                    </div>
+                                                    </div> */}
 
                                                     {/* Actions */}
                                                     <div className="flex items-center justify-end gap-3 pt-4">

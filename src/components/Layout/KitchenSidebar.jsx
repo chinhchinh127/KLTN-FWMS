@@ -17,6 +17,7 @@ import {
     ClipboardList,
     Download,
     User,
+    Plus,
 } from "lucide-react";
 import logo from "../../assets/Logo.svg";
 
@@ -91,6 +92,22 @@ const KitchenSidebar = () => {
                 >
                     <Package size={18} />
                     <span className="text-sm font-medium">Kho hàng</span>
+                </NavLink>
+
+                {/* Thêm món ăn  */}
+                <NavLink
+                    to="/kitchen/manager-dish"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
+                            ? "bg-[#10BC5D] text-white"
+                            : "text-[#3D3D3D] hover:bg-gray-100"
+                        }`
+                    }
+                >
+                    <Plus size={18} />
+                    <span className="text-sm font-medium">
+                        Thêm món ăn
+                    </span>
                 </NavLink>
 
                 {/* ===== MENU BÁO CÁO ===== */}
@@ -192,6 +209,7 @@ const KitchenSidebar = () => {
                         Cảnh báo lãng phí
                     </span>
                 </NavLink>
+
                 <NavLink
                     to="/kitchen/waste-base"
                     className={({ isActive }) =>
