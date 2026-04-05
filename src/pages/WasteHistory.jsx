@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getWasteHistory } from "../api/wasteApi";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 // format tháng -> "Tháng 1 2026"
 const formatMonthVN = (value) => {
@@ -34,7 +36,7 @@ export default function WasteHistory() {
     // 🔥 Stats
     const totalWaste = data.reduce(
         (sum, item) => sum + (item.leftover || 0),
-        0
+        0,
     );
 
     const avgWastePercent =
@@ -42,10 +44,96 @@ export default function WasteHistory() {
             ? Math.round(
                   data.reduce(
                       (sum, item) => sum + (item.leftoverPercent || 0),
-                      0
-                  ) / data.length
+                      0,
+                  ) / data.length,
               )
             : 0;
+
+    // ========== HÀM XUẤT EXCEL TOÀN BỘ ==========
+    const exportAllToExcel = () => {
+        const excelData = data.map((item) => ({
+            NGÀY: item.date,
+            "TÊN MÓN": item.name,
+            "MÓN RA": `${item.produced || 0} suất`,
+            "MÓN DÙNG": `${item.used || 0} suất`,
+            "MÓN DƯ": `${item.leftover || 0} suất`,
+            "TỈ LỆ DƯ": `${item.leftoverPercent || 0}%`,
+            AI: item.aiLevel || "Chưa có",
+            "NGUYÊN NHÂN AI": item.aiReason || "Chưa có dữ liệu",
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        worksheet["!cols"] = [
+            { wch: 12 },
+            { wch: 20 },
+            { wch: 10 },
+            { wch: 10 },
+            { wch: 10 },
+            { wch: 10 },
+            { wch: 8 },
+            { wch: 50 },
+        ];
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Lịch sử món dư");
+
+        const excelBuffer = XLSX.write(workbook, {
+            bookType: "xlsx",
+            type: "array",
+        });
+        const blob = new Blob([excelBuffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+
+        const fileName = `lich_su_mon_du_${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.xlsx`;
+        saveAs(blob, fileName);
+    };
+
+    // ========== HÀM XUẤT EXCEL TỪNG DÒNG ==========
+    const exportSingleToExcel = (item) => {
+        const singleData = [
+            {
+                NGÀY: item.date,
+                "TÊN MÓN": item.name,
+                "MÓN RA": `${item.produced || 0} suất`,
+                "MÓN DÙNG": `${item.used || 0} suất`,
+                "MÓN DƯ": `${item.leftover || 0} suất`,
+                "TỈ LỆ DƯ": `${item.leftoverPercent || 0}%`,
+                AI: item.aiLevel || "Chưa có",
+                "NGUYÊN NHÂN AI": item.aiReason || "Chưa có dữ liệu",
+            },
+        ];
+
+        const worksheet = XLSX.utils.json_to_sheet(singleData);
+        worksheet["!cols"] = [
+            { wch: 12 },
+            { wch: 20 },
+            { wch: 10 },
+            { wch: 10 },
+            { wch: 10 },
+            { wch: 10 },
+            { wch: 8 },
+            { wch: 50 },
+        ];
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(
+            workbook,
+            worksheet,
+            `Món dư: ${item.name}`,
+        );
+
+        const excelBuffer = XLSX.write(workbook, {
+            bookType: "xlsx",
+            type: "array",
+        });
+        const blob = new Blob([excelBuffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+
+        const fileName = `mon_du_${item.date}_${item.name}_${Date.now()}.xlsx`;
+        saveAs(blob, fileName);
+    };
 
     return (
         <div className="p-8 bg-gray-50 min-h-screen">
@@ -136,6 +224,28 @@ export default function WasteHistory() {
 
             {/* Table */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div className="flex justify-between items-center p-4 border-b bg-white">
+                    <h3 className="font-semibold text-gray-700">
+                        Chi tiết món dư
+                    </h3>
+                    <button
+                        onClick={exportAllToExcel}
+                        className="flex items-center gap-2 px-5 py-2.5 text-white rounded-xl text-sm font-bold hover:opacity-90 active:scale-95 transition-all"
+                        style={{
+                            background:
+                                "linear-gradient(135deg, #10BC5D, #0da04f)",
+                            boxShadow: "rgba(16, 188, 93, 0.25) 0px 4px 12px",
+                        }}
+                    >
+                        <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: "20px" }}
+                        >
+                            add
+                        </span>
+                        Xuất Excel
+                    </button>
+                </div>
                 <table className="w-full text-sm">
                     <thead className="bg-gray-100 text-gray-600">
                         <tr>
@@ -147,6 +257,7 @@ export default function WasteHistory() {
                             <th className="p-3 text-left">TỈ LỆ DƯ</th>
                             <th className="p-3 text-left">AI</th>
                             <th className="p-3 text-left">NGUYÊN NHÂN</th>
+                            <th className="p-3 text-left">THAO TÁC</th>
                         </tr>
                     </thead>
 
@@ -177,9 +288,7 @@ export default function WasteHistory() {
                                         {item.produced} suất
                                     </td>
 
-                                    <td className="p-3">
-                                        {item.used} suất
-                                    </td>
+                                    <td className="p-3">{item.used} suất</td>
 
                                     <td className="p-3 text-red-500 font-medium">
                                         {item.leftover} suất
@@ -196,8 +305,8 @@ export default function WasteHistory() {
                                                 item.aiLevel === "High"
                                                     ? "bg-red-100 text-red-600"
                                                     : item.aiLevel === "Medium"
-                                                    ? "bg-yellow-100 text-yellow-600"
-                                                    : "bg-green-100 text-green-600"
+                                                      ? "bg-yellow-100 text-yellow-600"
+                                                      : "bg-green-100 text-green-600"
                                             }`}
                                         >
                                             {item.aiLevel}
@@ -207,6 +316,29 @@ export default function WasteHistory() {
                                     {/* Nguyên nhân */}
                                     <td className="p-3 text-gray-600 text-sm">
                                         {item.aiReason}
+                                    </td>
+                                    <td className="p-3">
+                                        {/* NÚT XUẤT TỪNG DÒNG */}
+                                        <button
+                                            onClick={() =>
+                                                exportSingleToExcel(item)
+                                            }
+                                            className="flex items-center gap-1 px-3 py-1.5 text-white rounded-lg text-xs font-medium hover:opacity-90 active:scale-95 transition-all"
+                                            style={{
+                                                background:
+                                                    "linear-gradient(135deg, #10BC5D, #0da04f)",
+                                                boxShadow:
+                                                    "rgba(16, 188, 93, 0.25) 0px 2px 8px",
+                                            }}
+                                        >
+                                            <span
+                                                className="material-symbols-outlined"
+                                                style={{ fontSize: "16px" }}
+                                            >
+                                                download
+                                            </span>
+                                            Xuất
+                                        </button>
                                     </td>
                                 </tr>
                             ))
