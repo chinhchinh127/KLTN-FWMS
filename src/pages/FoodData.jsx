@@ -30,7 +30,7 @@ const FoodData = () => {
             console.log("API:", data);
 
             if (data.success) {
-                // ✅ FIX CHUẨN
+                
                 setFoodData(data.data.dishesOutput || []);
                 setTotalDish(data.data.sumDish || 0);
             }
@@ -102,7 +102,7 @@ const FoodData = () => {
                     </button>
                 </div>
             </div>
-
+            
             {/* Table */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
                 <table className="w-full">
@@ -131,35 +131,28 @@ const FoodData = () => {
                             </tr>
                         ) : (
                             foodData.map((row, index) => {
-                                const output = row.quantity_prepared || 0;
-                                const waste = row.quantity_waste || 0;
-                                const percent =
-                                    output > 0
-                                        ? Math.round((waste / output) * 100)
-                                        : 0;
-
                                 return (
                                     <tr key={index} className="border-b hover:bg-gray-50">
                                         <td className="py-4 px-5">
-                                            {new Date().toLocaleDateString("vi-VN")}
+                                            {new Date(row["daily_operation.operation_date"]).toLocaleDateString("vi-VN")}
                                         </td>
                                         <td className="py-4 px-5">
                                             {row["dish.name"]}
                                         </td>
                                         <td className="py-4 px-5">
-                                            {output} suất
+                                            {row.quantity_prepared} suất
                                         </td>
                                         <td className="py-4 px-5">
-                                            {waste} suất
+                                            {row.quantity_wasted} suất
                                         </td>
                                         <td
                                             className={`py-4 px-5 font-bold ${
-                                                percent > 20
+                                                row.waste_percentage > 20
                                                     ? "text-red-500"
                                                     : "text-[#141C21]"
                                             }`}
                                         >
-                                            {percent}%
+                                             {row.waste_percentage}%
                                         </td>
                                     </tr>
                                 );
