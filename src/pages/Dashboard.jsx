@@ -93,65 +93,6 @@ function AddPeopleForm({ onClose }) {
   );
 }
 
-function UpdatePeopleForm({ onClose }) {
-  const [count, setCount] = useState("");
-  const [updated, setUpdated] = useState(false);
-
-  const handleUpdate = () => {
-    if (!count || isNaN(count) || Number(count) <= 0) return;
-    setUpdated(true);
-    setTimeout(() => setUpdated(false), 2500);
-    setCount("");
-  };
-
-  return (
-    <Modal title="Cập nhật số lượng người ngày hôm nay" onClose={onClose}>
-      <div className="space-y-4" style={{ fontFamily: "'Nunito', sans-serif" }}>
-        <div>
-          <label className="block text-sm font-bold mb-1" style={{ color: "var(--color-text-2)" }}>Thời gian cập nhật</label>
-          <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm cursor-not-allowed" style={{ color: "var(--color-text-3)" }}>
-            <span className="material-symbols-outlined text-sm" style={{ color: "var(--color-primary)" }}>update</span>
-            <span className="font-semibold">{getCurrentDate()} — {getCurrentTime()}</span>
-            <span className="ml-auto text-xs bg-gray-200 px-2 py-0.5 rounded-full" style={{ color: "var(--color-text-3)" }}>Cố định</span>
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-bold mb-1" style={{ color: "var(--color-text-2)" }}>
-            Số lượng người cập nhật <span className="text-red-400">*</span>
-          </label>
-          <input
-            type="number"
-            min="1"
-            value={count}
-            onChange={(e) => setCount(e.target.value)}
-            placeholder="Nhập số lượng người mới..."
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none transition-all"
-            style={{ fontFamily: "'Nunito', sans-serif", color: "var(--color-text-1)" }}
-            onFocus={e => { e.target.style.borderColor = "var(--color-primary)"; e.target.style.boxShadow = "0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent)"; }}
-            onBlur={e => { e.target.style.borderColor = "#e5e7eb"; e.target.style.boxShadow = "none"; }}
-          />
-        </div>
-
-        {updated && (
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold border" style={{ background: "color-mix(in srgb, var(--color-primary) 10%, transparent)", borderColor: "color-mix(in srgb, var(--color-primary) 30%, transparent)", color: "var(--color-primary)" }}>
-            <span className="material-symbols-outlined text-sm">check_circle</span>
-            Cập nhật thành công!
-          </div>
-        )}
-
-        <button
-          onClick={handleUpdate}
-          className="w-full py-3 text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2"
-          style={{ background: "linear-gradient(to right, #0da04f, var(--color-primary))", fontFamily: "'Nunito', sans-serif", boxShadow: "0 4px 14px color-mix(in srgb, var(--color-primary) 30%, transparent)" }}
-        >
-          <span className="material-symbols-outlined text-sm">sync</span>
-          Cập nhật người mới
-        </button>
-      </div>
-    </Modal>
-  );
-}
-
 export default function Dashboard() {
   const [modal, setModal] = useState(null);
   const token = localStorage.getItem("token");
@@ -269,14 +210,6 @@ export default function Dashboard() {
               >
                 <span className="material-symbols-outlined text-sm">person_add</span>
                 Nhập số lượng người ngày hôm nay
-              </button>
-              <button
-                onClick={() => setModal("update")}
-                className="px-4 py-2.5 text-white rounded-xl flex items-center gap-2 font-bold text-sm hover:opacity-90 transition-all"
-                style={{ background: "linear-gradient(to right, var(--color-primary), #0da04f)", fontFamily: "'Nunito', sans-serif", boxShadow: "0 4px 12px color-mix(in srgb, var(--color-primary) 30%, transparent)" }}
-              >
-                <span className="material-symbols-outlined text-sm">sync</span>
-                Cập nhật số lượng ngày hôm nay
               </button>
             </div>
           </div>

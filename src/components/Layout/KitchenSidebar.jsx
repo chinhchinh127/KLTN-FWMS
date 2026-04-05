@@ -80,20 +80,6 @@ const KitchenSidebar = () => {
                     <span className="text-sm font-medium">Bảng điều khiển</span>
                 </NavLink>
 
-                {/* Kho hàng */}
-                <NavLink
-                    to="/kitchen/inventory"
-                    className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
-                            ? "bg-[#10BC5D] text-white"
-                            : "text-[#3D3D3D] hover:bg-gray-100"
-                        }`
-                    }
-                >
-                    <Package size={18} />
-                    <span className="text-sm font-medium">Kho hàng</span>
-                </NavLink>
-
                 {/* Thêm món ăn  */}
                 <NavLink
                     to="/kitchen/manager-dish"
@@ -109,90 +95,6 @@ const KitchenSidebar = () => {
                         Thêm món ăn
                     </span>
                 </NavLink>
-
-                {/* ===== MENU BÁO CÁO ===== */}
-                <div className="mb-1">
-                    {/* Button mở menu báo cáo */}
-                    <button
-                        onClick={() => toggleMenu("report")}
-                        className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors text-[#3D3D3D] hover:bg-gray-100"
-                    >
-                        <div className="flex items-center gap-3">
-                            <FileSpreadsheet size={18} />
-                            <span className="text-sm font-medium">
-                                Báo cáo & Xuất
-                            </span>
-                        </div>
-                        {openMenus.report ? (
-                            <ChevronDown size={16} />
-                        ) : (
-                            <ChevronRight size={16} />
-                        )}
-                    </button>
-
-                    {/* Submenu báo cáo */}
-                    {openMenus.report && (
-                        <div className="ml-7 mt-1 space-y-1">
-                            {/* Báo cáo món dư */}
-                            <NavLink
-                                to="/kitchen/report/surplus"
-                                className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isActive
-                                        ? "bg-[#10BC5D]/10 text-[#10BC5D]"
-                                        : "text-[#8B8B8B] hover:bg-gray-100"
-                                    }`
-                                }
-                            >
-                                <ClipboardList size={16} />
-                                <span className="text-sm">
-                                    Món dư (Surplus)
-                                </span>
-                            </NavLink>
-
-                            {/* Báo cáo doanh thu */}
-                            <NavLink
-                                to="/kitchen/report/revenue"
-                                className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isActive
-                                        ? "bg-[#10BC5D]/10 text-[#10BC5D]"
-                                        : "text-[#8B8B8B] hover:bg-gray-100"
-                                    }`
-                                }
-                            >
-                                <TrendingUp size={16} />
-                                <span className="text-sm">Doanh thu</span>
-                            </NavLink>
-
-                            {/* Báo cáo thất thoát */}
-                            <NavLink
-                                to="/kitchen/report/waste"
-                                className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isActive
-                                        ? "bg-[#10BC5D]/10 text-[#10BC5D]"
-                                        : "text-[#8B8B8B] hover:bg-gray-100"
-                                    }`
-                                }
-                            >
-                                <AlertTriangle size={16} />
-                                <span className="text-sm">Thất thoát</span>
-                            </NavLink>
-
-                            {/* Báo cáo tổng hợp */}
-                            <NavLink
-                                to="/kitchen/report/export"
-                                className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isActive
-                                        ? "bg-[#10BC5D]/10 text-[#10BC5D]"
-                                        : "text-[#8B8B8B] hover:bg-gray-100"
-                                    }`
-                                }
-                            >
-                                <Download size={16} />
-                                <span className="text-sm">Xuất dữ liệu</span>
-                            </NavLink>
-                        </div>
-                    )}
-                </div>
 
                 {/* Báo cáo lãng phí (giữ lại để tương thích cũ) */}
                 <NavLink
@@ -239,19 +141,6 @@ const KitchenSidebar = () => {
                     <span className="text-sm font-medium">Món dư</span>
                 </NavLink>
 
-                {/* Tin nhắn */}
-                <NavLink
-                    to="/kitchen/messages"
-                    className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
-                            ? "bg-[#10BC5D] text-white"
-                            : "text-[#3D3D3D] hover:bg-gray-100"
-                        }`
-                    }
-                >
-                    <MessageSquare size={18} />
-                    <span className="text-sm font-medium">Tin nhắn</span>
-                </NavLink>
                 {/* Thông tin cá nhân */}
                 <NavLink
                     to="/kitchen/profile"
@@ -266,20 +155,6 @@ const KitchenSidebar = () => {
                     <span className="text-sm font-medium">Thông tin cá nhân</span>
                 </NavLink>
 
-
-                {/* Cài đặt */}
-                <NavLink
-                    to="/kitchen/settings"
-                    className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
-                            ? "bg-[#10BC5D] text-white"
-                            : "text-[#3D3D3D] hover:bg-gray-100"
-                        }`
-                    }
-                >
-                    <Settings size={18} />
-                    <span className="text-sm font-medium">Cài đặt</span>
-                </NavLink>
             </div>
 
             {/* User Info - Cố định dưới cùng */}
