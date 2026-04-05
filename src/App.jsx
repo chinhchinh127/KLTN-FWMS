@@ -32,7 +32,7 @@ import SurplusDishes from "./pages/kitchen/SurplusDishes/SurplusDishes";
 import ProfilePage from "./pages/kitchen/ProfilePage";
 
 // Components
-import WasteAlert from "./components/WasteAlert";
+
 import WasteReportPage from "./components/WasteReportPage";
 
 // Admin Pages
@@ -80,7 +80,6 @@ function App() {
                             path="waste-history"
                             element={<WasteHistory />}
                         />
-                        <Route path="waste-report" element={<WasteAlert />} />
                         <Route
                             path="waste-base"
                             element={<WasteReportPage />}
@@ -102,7 +101,6 @@ function App() {
                             element={<SurplusDishes />}
                         />
                         <Route path="profile" element={<ProfilePage />} />
-                        <Route path="waste-report" element={<WasteAlert />} />
                         <Route path="waste-base" element={<WasteReportPage />} />
                         <Route path="manager-dish" element={<Manager_Dish_Kitchen/>} />
                     </Route>
