@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Logo from "../assets/Logo.svg";
+import { toast } from "sonner";
 
 function Login() {
     const [showPassword, setShowPassword] = useState(false);
@@ -19,12 +20,22 @@ function Login() {
     };
     const handleLogin = async (e) => {
         e.preventDefault();
+        if (form.email === "" && form.password == "") {
+            return toast.warning("Vui lòng nhập email và mật khẩu!");
+        }
+        if (form.email === "") {
+            return toast.warning("Vui long nhập Email!");
+        }
+        if (form.password === "") {
+            return toast.warning("Vui lòng nhập mật khẩu!");
+        }
+
         try {
             const clearnForm = {
                 email: form.email.trim(),
                 password: form.password,
             }
-                        
+
             const res = await axios.post("https://wasteless-ai.onrender.com/api/auth/login",
                 clearnForm
             );
@@ -33,27 +44,30 @@ function Login() {
             localStorage.setItem("token", token);
             const decode = jwtDecode(token);
             // console.log(decode);
-            console.log("Decoded token:", decode);
-            alert("Đăng nhập thành công");
+
+            toast.success("Đăng nhập thành công!");
 
             if (decode.role == "Manager") {
                 navigate("/app");
             } else if (decode.role == "Kitchen") {
                 navigate("/kitchen");
-            }else if(decode.role == "Admin"){
+            } else if (decode.role == "Admin") {
                 navigate("/admin");
             }
-            
+
         } catch (error) {
             console.log("lỗi", error);
-            
-            console.log(error.response?.data);
-            // alert(error.response?.data?.message || "Đăng nhập thất bại")
-            alert(error)
+
+            // const message = error.response?.data?.message || "Đăng nhập thất bại";
+
+            toast.error("Email hoặc mật khẩu không đúng!");
+
         }
     };
     return (
-        <div className="min-h-screen bg-gray-100">
+
+        <form className="min-h-screen bg-gray-100">
+
             {/* Header */}
             <div className="flex justify-between items-center px-4 py-2 bg-white shadow-sm">
                 <div className="flex justify-between items-center px-4 py-2 bg-white shadow-sm">
@@ -136,13 +150,18 @@ function Login() {
                     {/* Button */}
                     <button
                         onClick={handleLogin}
+                        onKeyDown={(e) =>{
+                            if(e.key=="enter"){
+                                handleLogin(e)
+                            }
+                        }}
                         className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold transition"
                     >
                         Đăng nhập
                     </button>
                 </div>
             </div>
-        </div>
+        </form>
     );
 }
 
