@@ -530,11 +530,11 @@ const DishDetailPanel = ({
                 </div>
                 <div className="text-center mb-3">
                     <h4 className="text-xl font-bold">{dish.name}</h4>
-                    <p className="text-sm font-semibold text-[#10bc5d] mt-1">
+                    {/* <p className="text-sm font-semibold text-[#10bc5d] mt-1">
                         {formatPrice
                             ? formatPrice(dish.price)
                             : `${dish.price}₫`}
-                    </p>
+                    </p> */}
                 </div>
                 <div className="mb-4">
                     <p className="text-sm font-semibold uppercase">DANH MỤC</p>

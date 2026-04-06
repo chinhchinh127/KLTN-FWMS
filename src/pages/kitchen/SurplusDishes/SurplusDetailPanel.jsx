@@ -224,7 +224,7 @@ const SurplusDetailPanel = ({
                                 <input
                                     type="number"
                                     min="0"
-                                    value={quantityWasted || ""}
+                                    value={quantityWasted}
                                     onChange={(e) => {
                                         const value = parseInt(e.target.value);
                                         setQuantityWasted(
@@ -433,7 +433,6 @@ const SurplusDetailPanel = ({
                         />
                     </div>
                 </div>
-
                 <div className="mb-4">
                     <p className="text-sm font-semibold uppercase">DANH MỤC</p>
                     <p className="text-base text-[#8b8b8b]">{dish.category}</p>
@@ -505,20 +504,20 @@ const SurplusDetailPanel = ({
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => onQuantityChange(-1)}
-                            className="w-10 h-10 rounded-xl border flex items-center justify-center hover:bg-orange-500 hover:text-white"
+                            className="w-10 h-10 rounded-xl border flex items-center justify-center hover:bg-[#10BC5D] hover:text-white"
                         >
                             <Minus size={18} />
                         </button>
                         <input
                             type="text"
                             inputMode="numeric"
-                            value={quantity || ""}
+                            value={quantity === 0 ? 0 : quantity || ""}
                             onChange={handleDetailWasteChange}
-                            className="flex-1 h-10 px-3 border rounded-xl text-center focus:ring-2 focus:ring-orange-500"
+                            className="flex-1 h-10 px-3 border rounded-xl text-center focus:ring-2 focus:ring-[#10BC5D]"
                         />
                         <button
                             onClick={() => onQuantityChange(1)}
-                            className="w-10 h-10 rounded-xl border flex items-center justify-center hover:bg-orange-500 hover:text-white"
+                            className="w-10 h-10 rounded-xl border flex items-center justify-center hover:bg-[#10BC5D] hover:text-white"
                         >
                             <Plus size={18} />
                         </button>
@@ -533,8 +532,6 @@ const SurplusDetailPanel = ({
             </div>
         );
     }
-
     return null;
 };
-
 export default SurplusDetailPanel;

@@ -4,7 +4,14 @@ import SurplusDetailPanel from "./SurplusDetailPanel";
 import ServedDishes from "../ServedDishes/ServedDishes";
 import { kitchenDishAPI } from "../../../services/kitchenApi";
 import { jwtDecode } from "jwt-decode";
-import { Calendar, RefreshCw } from "lucide-react";
+import {
+    Calendar,
+    RefreshCw,
+    ChevronLeft,
+    ChevronRight,
+    Edit2,
+} from "lucide-react";
+import { toast } from "sonner"; // THÊM IMPORT TOAST
 
 const SurplusDishes = () => {
     // State cho thanh điều hướng chính
@@ -105,8 +112,6 @@ const SurplusDishes = () => {
                 }));
                 console.log("Formatted surplus dishes:", formattedDishes);
                 setDishes(formattedDishes);
-                console.log("Setting dishes:", formattedDishes);
-                setDishes(formattedDishes);
                 setLastUpdated(new Date());
             } else {
                 setError(response.message || "Không thể tải dữ liệu");
@@ -141,6 +146,7 @@ const SurplusDishes = () => {
 
     const handleRefresh = () => {
         fetchDishes();
+        toast.success("Đã làm mới dữ liệu", { duration: 2000 });
     };
 
     const formatPrice = (price) => {
@@ -165,8 +171,10 @@ const SurplusDishes = () => {
         setQuantity((prev) => Math.max(0, prev + delta));
     };
 
+    // CẬP NHẬT MÓN DƯ - SỬ DỤNG TOAST THAY VÌ ALERT
     const handleSaveReport = async () => {
         if (selectedDish) {
+            const toastId = toast.loading("Đang cập nhật số lượng dư...");
             try {
                 const updateData = {
                     quantity_wasted: quantity,
@@ -181,23 +189,27 @@ const SurplusDishes = () => {
                     await fetchDishes();
                     setSelectedDish(null);
                     setLastUpdated(new Date());
-                    alert(
+                    toast.success(
                         `Đã cập nhật số lượng dư cho món ${selectedDish.name}: ${quantity} phần`,
+                        { id: toastId, duration: 3000 },
                     );
                 } else {
                     throw new Error(response.message || "Cập nhật thất bại");
                 }
             } catch (error) {
                 console.error("Error updating leftover:", error);
-                alert(
+                toast.error(
                     error.response?.data?.message ||
                         "Có lỗi xảy ra khi cập nhật số lượng dư",
+                    { id: toastId, duration: 4000 },
                 );
             }
         }
     };
 
+    // THÊM MỚI BÁO CÁO MÓN DƯ - SỬ DỤNG TOAST
     const handleAddNewReport = async (newReportData) => {
+        const toastId = toast.loading("Đang thêm món dư...");
         try {
             const existingDailyDish = dishes.find(
                 (d) =>
@@ -215,25 +227,26 @@ const SurplusDishes = () => {
                         quantity_wasted: updatedWaste,
                     },
                 );
-
                 await fetchDishes();
-                alert(
+                toast.success(
                     `Đã cập nhật món dư ${existingDailyDish.name}: +${newReportData.quantity_wasted} phần`,
+                    { id: toastId, duration: 3000 },
                 );
                 setShowAddForm(false);
                 return;
             }
-
-            alert(
-                `❌ Món "${newReportData.dishName}" không có trong danh sách món đã ra. Vui lòng chỉ thêm món từ danh sách đã có.`,
+            toast.error(
+                `Món "${newReportData.dishName}" không có trong danh sách món đã ra. Vui lòng chỉ thêm món từ danh sách đã có.`,
+                { id: toastId, duration: 4000 },
             );
             setShowAddForm(false);
         } catch (error) {
             console.error("Lỗi:", error);
-            alert(
+            toast.error(
                 error.response?.data?.message ||
                     error.message ||
                     "Có lỗi xảy ra",
+                { id: toastId, duration: 4000 },
             );
             throw error;
         }
@@ -263,7 +276,7 @@ const SurplusDishes = () => {
         return (
             <div className="p-8 bg-gray-50 min-h-screen">
                 <div className="flex flex-col justify-center items-center h-64">
-                    <div className="text-red-500 mb-4">{error}</div>
+                    <div className="text-bg-[#10BC5D] mb-4">{error}</div>
                     <button
                         onClick={handleRefresh}
                         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -337,6 +350,13 @@ const SurplusDishes = () => {
                                 Hôm nay
                             </span>
                         </div>
+                        <button
+                            onClick={handleRefresh}
+                            className="p-2 hover:bg-gray-100 rounded-full"
+                            title="Làm mới dữ liệu"
+                        >
+                            <RefreshCw size={18} className="text-gray-600" />
+                        </button>
                     </div>
 
                     <div className="flex gap-8 items-start">
@@ -377,7 +397,6 @@ const SurplusDishes = () => {
                                 formatPrice={formatPrice}
                             />
                         </div>
-
                         {selectedDish && (
                             <SurplusDetailPanel
                                 isDetail={true}
@@ -389,7 +408,6 @@ const SurplusDishes = () => {
                                 formatPrice={formatPrice}
                             />
                         )}
-
                         {showAddForm && (
                             <SurplusDetailPanel
                                 isModal={true}
@@ -402,10 +420,12 @@ const SurplusDishes = () => {
                     </div>
                 </>
             ) : (
-                <ServedDishes />
+                <ServedDishes
+                    surplusData={dishes}
+                    selectedDate={selectedDate}
+                />
             )}
         </div>
     );
 };
-
 export default SurplusDishes;

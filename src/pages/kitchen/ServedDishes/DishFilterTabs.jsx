@@ -22,26 +22,6 @@ const DishFilterTabs = ({
                 >
                     Tất cả ({totalAll})
                 </button>
-                <button
-                    onClick={() => onTabChange("active")}
-                    className={`px-5 py-2.5 text-sm font-medium transition-all ${
-                        activeTab === "active"
-                            ? "text-[#10bc5d] border-b-2 border-[#10bc5d]"
-                            : "text-[#8b8b8b] hover:text-[#3d3d3d]"
-                    }`}
-                >
-                    Đang hoạt động ({totalActive})
-                </button>
-                <button
-                    onClick={() => onTabChange("closed")}
-                    className={`px-5 py-2.5 text-sm font-medium transition-all ${
-                        activeTab === "closed"
-                            ? "text-[#10bc5d] border-b-2 border-[#10bc5d]"
-                            : "text-[#8b8b8b] hover:text-[#3d3d3d]"
-                    }`}
-                >
-                    Đã đóng ({totalClosed})
-                </button>
             </div>
 
             <div className="mt-5">
