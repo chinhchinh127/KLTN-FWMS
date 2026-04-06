@@ -20,9 +20,13 @@ function Login() {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post(
-                "https://wasteless-ai.onrender.com/api/auth/login",
-                form,
+            const clearnForm = {
+                email: form.email.trim(),
+                password: form.password,
+            }
+                        
+            const res = await axios.post("https://wasteless-ai.onrender.com/api/auth/login",
+                clearnForm
             );
             const token = res.data.data;
             console.log(token);
@@ -36,10 +40,16 @@ function Login() {
                 navigate("/app");
             } else if (decode.role == "Kitchen") {
                 navigate("/kitchen");
+            }else if(decode.role == "Admin"){
+                navigate("/admin");
             }
+            
         } catch (error) {
+            console.log("lỗi", error);
+            
             console.log(error.response?.data);
-            alert(error.response?.data?.message || "Đăng nhập thất bại");
+            // alert(error.response?.data?.message || "Đăng nhập thất bại")
+            alert(error)
         }
     };
     return (

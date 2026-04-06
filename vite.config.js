@@ -10,12 +10,11 @@ export default defineConfig({
                 target: "https://wasteless-ai.onrender.com",
                 changeOrigin: true,
                 secure: false,
+                // rewrite: (path) => path.replace(/^\/api/, ""),
             },
         },
-        // port: 3000,
-        // open: true,
     },
-    // Thêm cấu hình này để hỗ trợ JSX trong file .js
+
     esbuild: {
         loader: "jsx",
         include: /src\/.*\.jsx?$/,

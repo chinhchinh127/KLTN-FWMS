@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
+    AlertTriangle,
     Users,
     UserCircle,
     Utensils,
@@ -186,8 +187,10 @@ const Sidebar = () => {
                     </span>
                 </NavLink>
 
+               
+
                 <NavLink
-                    to="/waste-report"
+                    to="/app/waste-base"
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
                             ? "bg-[#10BC5D] text-white"
@@ -195,23 +198,10 @@ const Sidebar = () => {
                         }`
                     }
                 >
-                    <BarChart3 size={18} />
+                    <AlertTriangle size={18} />
                     <span className="text-sm font-medium">
                         Báo cáo lãng phí
                     </span>
-                </NavLink>
-
-                <NavLink
-                    to="/ai-analysis"
-                    className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${isActive
-                            ? "bg-[#10BC5D] text-white"
-                            : "text-[#3D3D3D] hover:bg-gray-100"
-                        }`
-                    }
-                >
-                    <Brain size={18} />
-                    <span className="text-sm font-medium">Phân tích AI</span>
                 </NavLink>
 
                 <NavLink

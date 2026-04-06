@@ -105,6 +105,8 @@ const SurplusDishes = () => {
                 }));
                 console.log("Formatted surplus dishes:", formattedDishes);
                 setDishes(formattedDishes);
+                console.log("Setting dishes:", formattedDishes);
+                setDishes(formattedDishes);
                 setLastUpdated(new Date());
             } else {
                 setError(response.message || "Không thể tải dữ liệu");

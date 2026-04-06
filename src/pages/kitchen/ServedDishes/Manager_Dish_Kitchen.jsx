@@ -1,17 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
-import { getUserInfo } from "../utils/auth";
+import { getUserInfo } from "../../../utils/auth";
 
 import {
-  getAllDishes,
-  getAllDishesFalse,
-  createDish,
-  updateDish,
-  deleteDish,
   approveDish,
   getCategoryDishes,
   getIngredientsByBrand,
-} from "../services/dishService";
+} from "../../../services/dishService";
 
+import { Create_Dish_Kitchen, getAll_Dish, List_Dish_Await } from "../../../services/Dish_Kitchen";
+import { toast } from "sonner";
 
 function Modal({ title, onClose, children }) {
   return (
@@ -137,12 +134,7 @@ function FoodFormModal({
       return;
     }
 
-    if (!isEdit && (!brandId || !userId)) {
-      setError("Thiếu thông tin brand hoặc user. Vui lòng đăng nhập lại!");
-      return;
-    }
-
-    // Lọc và chuẩn bị recipes (chỉ lấy những dòng đã chọn nguyên liệu + số lượng)
+    // validate nguyên liệu
     const validRecipes = dishRecipes
       .filter((r) => r.ingredient_id && r.quantity?.trim())
       .map((r) => ({
@@ -150,51 +142,43 @@ function FoodFormModal({
         quantity: Number(r.quantity),
       }));
 
+    if (validRecipes.length === 0) {
+      setError("Phải có ít nhất 1 nguyên liệu");
+      return;
+    }
+
+    const payload = {
+      dish_category_id: form.category,
+      name: form.name.trim(),
+      price: Number(form.price),
+      des: form.des.trim() || "",
+      dish_recipes: validRecipes,
+    };
+
+    console.log("=== Payload gửi API mới ===", payload);
+
     try {
       setLoading(true);
       setError("");
 
-      if (isEdit && initial?.id) {
-        // Phần Edit (bạn có thể chỉnh sau nếu cần)
-        await updateDish(initial.id, {
-          dish_category_id: form.category,
-          name: form.name.trim(),
-          price: Number(form.price),
-          des: form.des.trim(),
-          status: form.status === "active",
-          dish_recipes: validRecipes,
-        });
-      } else {
-        // === PHẦN CREATE - ĐÃ SỬA ĐÚNG ===
-        const payload = {
-          dish_category_id: form.category,
-          name: form.name.trim(),
-          price: Number(form.price),
-          des: form.des.trim() || "",
-          status: form.status === "active",
-          dish_recipes: validRecipes,        // ← Truyền ARRAY, không stringify
-        };
+      await Create_Dish_Kitchen(payload);
 
-        console.log("=== Payload gửi createDish ===", payload);
-
-        await createDish(brandId, userId, payload);
-      }
-
-      alert("Thêm món ăn thành công!");
+      toast.success("Thêm món ăn thành công!");
       onSave();
       onClose();
     } catch (err) {
-      console.error("=== LỖI ĐẦY ĐỦ ===", err);
-      let errorMsg = "Có lỗi xảy ra khi lưu món ăn";
+      console.error("=== LỖI ===", err);
+
+      let errorMsg = "Có lỗi xảy ra";
 
       if (err?.response?.data) {
         const backendError = err.response.data;
-        errorMsg = backendError.message ||
+        errorMsg =
+          backendError.message ||
           backendError.error ||
-          (backendError.errors ? `Lỗi: ${backendError.errors}` : JSON.stringify(backendError));
+          JSON.stringify(backendError);
       }
 
-      console.error("Backend trả về:", err?.response?.data);
       setError(errorMsg);
     } finally {
       setLoading(false);
@@ -361,7 +345,7 @@ function FoodFormModal({
 }
 
 // ─── Main FoodsPage ────────────────────────────────────────────────────────
-export default function FoodsPage() {
+export default function Manager_Dish_Kitchen() {
 
 
   const userInfo = getUserInfo();   // ← Lấy từ JWT decode
@@ -377,61 +361,43 @@ export default function FoodsPage() {
     console.log("brandId:", brandId);
   }, [userId, brandId]);
 
-  const [foods, setFoods] = useState([]);
   const [pending, setPending] = useState([]);
   const [activeTab, setActiveTab] = useState("list");
   const [modal, setModal] = useState(null);
-
-  const fetchFoods = useCallback(async () => {
+  
+  const fetchFoods = async () => {
     try {
-      const [activeRes, pendingRes] = await Promise.all([
-        getAllDishes(),
-        getAllDishesFalse(),
-      ]);
-      setFoods(Array.isArray(activeRes?.data) ? activeRes.data : []);
-      setPending(Array.isArray(pendingRes?.data) ? pendingRes.data : []);
+      const res = await List_Dish_Await();
+      setPending(Array.isArray(res.data) ? res.data : []);
+      console.log(res.data);
+      
     } catch (err) {
       console.error("Lỗi tải danh sách món ăn:", err);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchFoods();
-  }, [fetchFoods]);
+  }, []);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc muốn xóa món ăn này không?")) return;
-    try {
-      await deleteDish(id);
-      fetchFoods();
-    } catch (err) {
-      const msg = err?.response?.data?.message || "";
-      if (msg.includes("foreign key")) {
-        alert("Không thể xóa: món ăn đang được dùng trong thực đơn. Hãy gỡ khỏi thực đơn trước.");
-      } else {
-        alert("Xóa thất bại: " + (msg || "Có lỗi xảy ra"));
+  // get_All_Dishes
+  const [getAll_Dishes, setGetAll_Dishes] = useState([]);
+  useEffect(() => {
+    const fetch_getAll_Dish = async () => {
+      try {
+
+        const res = await getAll_Dish();
+        setGetAll_Dishes(res.data);
+        // console.log(res.data);
+
+      }
+      catch (error) {
+        console.log(error.response);
       }
     }
-  };
 
-  const handleApprove = async (id) => {
-    try {
-      await approveDish(id);
-      fetchFoods();
-    } catch (err) {
-      alert("Duyệt thất bại: " + (err?.response?.data?.message || ""));
-    }
-  };
-
-  const handleReject = async (id) => {
-    if (!window.confirm("Bạn có chắc muốn từ chối món ăn này?")) return;
-    try {
-      await deleteDish(id);
-      fetchFoods();
-    } catch (err) {
-      alert("Từ chối thất bại: " + (err?.response?.data?.message || ""));
-    }
-  };
+    fetch_getAll_Dish();
+  }, []);
 
   const thClass = "px-6 py-4 text-xs font-bold uppercase tracking-wider";
 
@@ -465,7 +431,7 @@ export default function FoodsPage() {
                   margin: 0,
                 }}
               >
-                Quản lý Món ăn
+                Thêm & Xem Danh Sách Món Ăn
               </h2>
               <button
                 onClick={() => setModal("add")}
@@ -484,7 +450,8 @@ export default function FoodsPage() {
             <div className="flex gap-6">
               {[
                 { key: "list", label: "Danh sách món ăn" },
-                { key: "pending", label: "Chờ duyệt", badge: pending.length },
+                { key: "pending", label: "Đã gửi yêu cầu", badge: pending.length },
+
               ].map((tab) => (
                 <button
                   key={tab.key}
@@ -526,15 +493,15 @@ export default function FoodsPage() {
                     className="text-xs font-bold px-2.5 py-1 rounded-full"
                     style={{ background: "rgba(16,188,93,0.1)", color: "var(--color-primary)" }}
                   >
-                    {foods.length} món
+                    {getAll_Dishes.length} món
                   </span>
                 </div>
 
-                {/* Table đã có cột Người tạo */}
+                {/* Table List Dish */}
                 <table className="w-full text-left">
                   <thead style={{ background: "#f8faf9" }}>
                     <tr>
-                      {["Tên món ăn", "Danh mục", "Đơn giá", "Người tạo", "Trạng thái", "Thao tác"].map(
+                      {["Tên món ăn", "Danh mục", "Đơn giá", "Người tạo", "Trạng thái"].map(
                         (header, idx) => (
                           <th
                             key={header}
@@ -551,7 +518,7 @@ export default function FoodsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {foods.map((item) => (
+                    {getAll_Dishes.map((item) => (
                       <tr
                         key={item.id}
                         className="hover:bg-slate-50/60 transition-colors"
@@ -593,7 +560,7 @@ export default function FoodsPage() {
                         </td>
 
                         <td className="px-6 py-4 text-sm" style={{ color: "var(--color-text-2)" }}>
-                          {item.user_id === userId ? "Tôi" : "Không rõ"}
+                          {item.id === userId ? "Tôi" : item.user?.name || "Không rõ"}
 
                         </td>
 
@@ -602,51 +569,22 @@ export default function FoodsPage() {
                             <span
                               className="w-2 h-2 rounded-full"
                               style={{
-                                background: item.status === true ? "var(--color-primary)" : "#9ca3af",
+                                background: "var(--color-primary)",
                               }}
                             />
                             <span
                               style={{
-                                color: item.status === true ? "var(--color-primary)" : "var(--color-text-3)",
+                                color: "var(--color-primary)",
                               }}
                             >
-                              {item.status === true ? "Hoạt động" : "Tạm dừng"}
+                              {"Hoạt động"}
                             </span>
                           </span>
-                        </td>
-
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex justify-end gap-1.5">
-                            <button
-                              onClick={() => setModal({ type: "edit", item })}
-                              className="p-2 rounded-lg hover:bg-green-50 transition-colors"
-                              title="Cập nhật"
-                            >
-                              <span
-                                className="material-symbols-outlined"
-                                style={{ fontSize: 18, color: "var(--color-text-3)" }}
-                              >
-                                edit
-                              </span>
-                            </button>
-                            <button
-                              onClick={() => handleDelete(item.id)}
-                              className="p-2 rounded-lg hover:bg-red-50 transition-colors"
-                              title="Xóa"
-                            >
-                              <span
-                                className="material-symbols-outlined"
-                                style={{ fontSize: 18, color: "#f87171" }}
-                              >
-                                delete
-                              </span>
-                            </button>
-                          </div>
                         </td>
                       </tr>
                     ))}
 
-                    {foods.length === 0 && (
+                    {getAll_Dishes.length === 0 && (
                       <tr>
                         <td colSpan={6} className="px-6 py-12 text-center text-sm" style={{ color: "var(--color-text-3)" }}>
                           Chưa có món ăn nào
@@ -670,7 +608,7 @@ export default function FoodsPage() {
                     margin: 0,
                   }}
                 >
-                  Danh sách chờ duyệt
+                  Danh sách món đã yêu cầu!
                 </h3>
 
                 {pending.length === 0 ? (
@@ -726,23 +664,6 @@ export default function FoodsPage() {
                             </span>
                           </div>
                         </div>
-                      </div>
-
-                      <div className="flex gap-3 flex-shrink-0">
-                        <button
-                          onClick={() => handleReject(item.id)}
-                          className="px-5 py-2 rounded-xl text-sm font-bold border-2 transition-all hover:bg-red-50"
-                          style={{ borderColor: "#ef4444", color: "#ef4444" }}
-                        >
-                          Từ chối
-                        </button>
-                        <button
-                          onClick={() => handleApprove(item.id)}
-                          className="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
-                          style={{ background: "linear-gradient(135deg, var(--color-primary), #0da04f)" }}
-                        >
-                          Duyệt món
-                        </button>
                       </div>
                     </div>
                   ))

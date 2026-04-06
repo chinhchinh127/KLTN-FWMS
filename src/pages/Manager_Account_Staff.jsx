@@ -1,9 +1,86 @@
 import React, { useState } from "react";
 import { Row_Account_Staff } from "../components/Child/Row_Account_Staff";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import { toast } from "sonner";
 
 const Manager_Account_Staff = () => {
     const [openform_addkitchen, setopenform_setkitchen] = useState(null);
     const [visibility_password, setVisibility_password] = useState(null);
+    const [formaddkitchen, setFormaddkitchen] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+        address: "",
+    });
+    const token = localStorage.getItem("token");
+    const decode = jwtDecode(token);
+    console.log(decode);
+    console.log(decode);
+
+    const userID = decode.userId;
+    const brandID = decode.brandID;
+    // console.log("brandID", brandID);
+
+
+    const handleChange = (e) => {
+        setFormaddkitchen({
+            ...formaddkitchen,
+            [e.target.name]: e.target.value,
+        });
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (formaddkitchen.name === "") return toast.error("Username không được để trống!");
+        if (formaddkitchen.name.length <= 1) return toast.error("Vui lòng nhập tên đầy đủ!");
+        // test email
+        if (formaddkitchen.email === "") {
+           return toast.error("Email không được để trống!")
+        } else if (!formaddkitchen.email.endsWith("@gmail.com"))
+            return toast.error("Email không hợp lệ!");
+        if (formaddkitchen.phone === "") return toast.error("Số điện thoại không được để trống!");
+        if (!/[0-9]/.test(formaddkitchen.phone)) return toast.error("Số điện thoại không đúng định dạng");
+        if (formaddkitchen.phone.length < 10 || formaddkitchen.phone.length > 10 ) return toast.error("Số điện thoại không đúng");
+        if (formaddkitchen.address === "") return toast.error("Địa chỉ không được để trống!");
+        if (formaddkitchen.address.length <= 2) return toast.error("Vui lòng nhập địa chỉ cụ thể!");
+        //test password
+        if (formaddkitchen.password === "") return toast.error("Mật khẩu không được để trống!");
+        if (formaddkitchen.password.length < 6 || formaddkitchen.password.length > 18) {
+            return toast.error("Mật khẩu phải từ 6 đến 18 ký tự!");
+        }
+        if (!/[A-Z]/.test(formaddkitchen.password)) {
+            return toast.error("Mật khẩu phải chứa ít nhất 1 chữ hoa (A-Z)!");
+        }
+        if (!/[a-z]/.test(formaddkitchen.password)) {
+            return toast.error("Mật khẩu phải chứa ít nhất 1 chữ thường (a-z)!");
+        }
+        if (!/[0-9]/.test(formaddkitchen.password)) {
+            return toast.error("Mật khẩu phải chứa ít nhất 1 chữ số (0-9)!");
+        }
+        if (!/[@$!%*?&]/.test(formaddkitchen.password)) {
+            return toast.error("Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (@, $, !, %, *, ?, &)");
+        }
+        if (formaddkitchen.password.length <= 5) return toast.error("Mật khẩu của bạn quá ngắn!");
+        try {
+            const res = await axios.post(
+                `https://wasteless-ai.onrender.com/api/users/register-kitchen/${userID}`,
+                formaddkitchen,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
+                }
+            );
+            console.log(res.data);
+            toast.success("Tạo tài khoản thành công!");
+            setopenform_setkitchen(false);
+        } catch (error) {
+            console.log(error.response?.data);
+            toast.warning("Email này đã được đăng ký!");
+        }
+    };
     return (
         <div>
             <meta charSet="utf-8" />
@@ -120,7 +197,8 @@ const Manager_Account_Staff = () => {
                                     </p>
                                 </div>
                                 {/* Modal Body / Form */}
-                                <form className="px-8 pb-8 space-y-5">
+
+                                <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-5 ">
                                     {/* Full Name */}
                                     <div className="flex flex-col gap-1.5">
                                         <label className="label-style">
@@ -130,6 +208,9 @@ const Manager_Account_Staff = () => {
                                             className="form-input w-full rounded-lg border-primary/20 bg-background-light px-4 py-3 text-secondary-text focus:border-primary focus:ring-primary/20 font-nunito"
                                             placeholder="Nhập họ và tên đầy đủ"
                                             type="text"
+                                            name="name"
+                                            value={formaddkitchen.name}
+                                            onChange={handleChange}
                                         />
                                     </div>
                                     {/* Email */}
@@ -141,6 +222,9 @@ const Manager_Account_Staff = () => {
                                             className="form-input w-full rounded-lg border-primary/20 bg-background-light px-4 py-3 text-secondary-text focus:border-primary focus:ring-primary/20 font-nunito"
                                             placeholder="example@domain.com"
                                             type="email"
+                                            name="email"
+                                            value={formaddkitchen.email}
+                                            onChange={handleChange}
                                         />
                                     </div>
                                     <div className="flex flex-col gap-1.5">
@@ -151,6 +235,9 @@ const Manager_Account_Staff = () => {
                                             className="form-input w-full rounded-lg border-primary/20 bg-background-light px-4 py-3 text-secondary-text focus:border-primary focus:ring-primary/20 font-nunito"
                                             placeholder="0345651074"
                                             type="text"
+                                            name="phone"
+                                            value={formaddkitchen.phone}
+                                            onChange={handleChange}
                                         />
                                     </div>
                                     <div className="flex flex-col gap-1.5">
@@ -161,6 +248,9 @@ const Manager_Account_Staff = () => {
                                             className="form-input w-full rounded-lg border-primary/20 bg-background-light px-4 py-3 text-secondary-text focus:border-primary focus:ring-primary/20 font-nunito"
                                             placeholder="129 Hoàng Minh Thảo, HKN, Liên Chiểu, Đà Nẵng"
                                             type="text"
+                                            name="address"
+                                            value={formaddkitchen.address}
+                                            onChange={handleChange}
                                         />
                                     </div>
                                     {/* Password */}
@@ -177,6 +267,9 @@ const Manager_Account_Staff = () => {
                                                         ? "text"
                                                         : "password"
                                                 }
+                                                name="password"
+                                                value={formaddkitchen.password}
+                                                onChange={handleChange}
                                             />
                                             <button
                                                 onClick={() =>
@@ -215,92 +308,6 @@ const Manager_Account_Staff = () => {
                         </div>
                     )}
                 </main>
-            </div>
-            {/* Modal Mockup for 'Chỉnh sửa thông tin người dùng' - Hidden by default but structured for visualization */}
-            <div
-                div
-                className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
-            >
-                <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden">
-                    <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                        <h3 className="text-xl font-bold text-slate-900">
-                            Chỉnh sửa tài khoản
-                        </h3>
-                        <button className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
-                            <span className="material-symbols-outlined">
-                                close
-                            </span>
-                        </button>
-                    </div>
-                    <div className="p-6 space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-700">
-                                    Họ và tên
-                                </label>
-                                <input
-                                    className="w-full px-4 py-2.5 bg-slate-50 border-slate-200 rounded-xl focus:ring-primary focus:border-primary"
-                                    type="text"
-                                    defaultValue="Nguyễn Văn A"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-700">
-                                    Vai trò
-                                </label>
-                                <select className="w-full px-4 py-2.5 bg-slate-50 border-slate-200 rounded-xl focus:ring-primary focus:border-primary">
-                                    <option selected>Kitchen Staff</option>
-                                    <option>Kitchen Lead</option>
-                                    <option>Inventory Manager</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700">
-                                Email
-                            </label>
-                            <input
-                                className="w-full px-4 py-2.5 bg-slate-50 border-slate-200 rounded-xl focus:ring-primary focus:border-primary"
-                                type="email"
-                                defaultValue="a.nguyen@kitchen.com"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-700">
-                                Trạng thái tài khoản
-                            </label>
-                            <div className="flex gap-4">
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        defaultChecked
-                                        className="text-primary focus:ring-primary"
-                                        name="status"
-                                        type="radio"
-                                    />
-                                    <span className="text-sm">Hoạt động</span>
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        className="text-primary focus:ring-primary"
-                                        name="status"
-                                        type="radio"
-                                    />
-                                    <span className="text-sm">
-                                        Khóa tài khoản
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="p-6 bg-slate-50 flex gap-3 justify-end">
-                        <button className="px-6 py-2.5 text-slate-600 font-bold hover:underline">
-                            Hủy bỏ
-                        </button>
-                        <button className="px-8 py-2.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20">
-                            Lưu thay đổi
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     );

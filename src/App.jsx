@@ -1,77 +1,127 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Toaster } from "sonner";
+
+// Layouts
 import Layout from "./components/Layout/Layout";
-import ChatWidget from "./components/ChatWidget";
-import KitchenLayout from "./components/Layout/KitchenLayout"; // COMMENT
+import KitchenLayout from "./components/Layout/KitchenLayout";
+import { LayoutAdmin } from "./components/Layout/LayoutAdmin";
 
-// Kitchen pages
-import KitchenDashboard from "./pages/kitchen/KitchenDashboard"; // COMMENT
+// Routes bảo vệ
+import PrivateRoute from "./components/PrivateRoute";
+import KitchenRoute from "./components/KitchenRoute";
+import { AdminRoute } from "./components/AdminRoute";
 
-// Admin/Main pages
+// Pages - Auth
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
+// Manager Pages
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
 import FoodData from "./pages/FoodData";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Revenue from "./pages/Revenue";
-import PrivateRoute from "./components/PrivateRoute";
-import WasteHistory from "./pages/WasteHistory";
-import Manager_Account_Staff from "./pages/Manager_Account_Staff";
 import FoodManager from "./pages/foodManager";
 import IngredientManager from "./pages/IngredientManager";
+import Revenue from "./pages/Revenue";
+import WasteHistory from "./pages/WasteHistory";
+import Manager_Account_Staff from "./pages/Manager_Account_Staff";
 
+// Kitchen Pages
+import KitchenDashboard from "./pages/kitchen/KitchenDashboard";
 import SurplusDishes from "./pages/kitchen/SurplusDishes/SurplusDishes";
+import ProfilePage from "./pages/kitchen/ProfilePage";
 
-import SurplusReport from "./pages/kitchen/reports/SurplusReport";
-import RevenueReport from "./pages/kitchen/reports/RevenueReport";
-import WasteReport from "./pages/kitchen/reports/WasteReport";
-import ReportExport from "./pages/kitchen/ReportExport";
-import KitchenRoute from "./components/KitchenRoute";
+// Components
+
+import WasteReportPage from "./components/WasteReportPage";
+
+// Admin Pages
+import { AdminDashboard } from "./pages/Admin/AdminDashboard";
+
+// Widget
+import ChatWidget from "./components/ChatWidget";
+import Manager_Dish_Kitchen from "./pages/kitchen/ServedDishes/Manager_Dish_Kitchen";
 
 function App() {
+    const token = localStorage.getItem("token");
     return (
-        <Router basename="/KLTN-FWMS">
-            <ChatWidget />
-            <Routes>
-                {/* Admin routes */}
-                <Route path="/" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route
-                    path="/app"
-                    element={
-                        <PrivateRoute>
-                            <Layout />
-                        </PrivateRoute>
-                    }
-                >
-                    <Route index element={<Dashboard />} />
-                    <Route path="customers" element={<Customers />} />
-                    <Route path="food-data" element={<FoodData />} />
-                    <Route path="foods" element={<FoodManager />} />
-                    <Route path="ingredients" element={<IngredientManager />} />
+        <>
+            <Toaster position="top-right" richColors />
 
+            <Router basename="/KLTN-FWMS">
+                <Routes>
+                    {/* Auth */}
+                    <Route path="/" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+
+                    {/* Manager */}
                     <Route
-                        path="accounts"
-                        element={<Manager_Account_Staff />}
-                    />
-                    <Route path="revenue" element={<Revenue />} />
-                    <Route path="waste-history" element={<WasteHistory />} />
-                </Route>
+                        path="/app"
+                        element={
+                            <PrivateRoute>
+                                <Layout />
+                            </PrivateRoute>
+                        }
+                    >
+                        <Route index element={<Dashboard />} />
+                        <Route path="customers" element={<Customers />} />
+                        <Route path="food-data" element={<FoodData />} />
+                        <Route path="foods" element={<FoodManager />} />
+                        <Route
+                            path="ingredients"
+                            element={<IngredientManager />}
+                        />
+                        <Route
+                            path="accounts"
+                            element={<Manager_Account_Staff />}
+                        />
+                        <Route path="revenue" element={<Revenue />} />
+                        <Route
+                            path="waste-history"
+                            element={<WasteHistory />}
+                        />
+                        <Route
+                            path="waste-base"
+                            element={<WasteReportPage />}
+                        />
+                    </Route>
 
-                {/* Tạm thời comment kitchen routes  */}
-                <Route
-                    path="/kitchen"
-                    element={
-                        <KitchenRoute>
-                            <KitchenLayout />
-                        </KitchenRoute>
-                    }
-                >
-                    <Route index element={<KitchenDashboard />} />
-                    <Route path="surplus-dishes" element={<SurplusDishes />} />
-                </Route>
-            </Routes>
-        </Router>
+                    {/* Kitchen */}
+                    <Route
+                        path="/kitchen"
+                        element={
+                            <KitchenRoute>
+                                <KitchenLayout />
+                            </KitchenRoute>
+                        }
+                    >
+                        <Route index element={<KitchenDashboard />} />
+                        <Route
+                            path="surplus-dishes"
+                            element={<SurplusDishes />}
+                        />
+                        <Route path="profile" element={<ProfilePage />} />
+                        <Route path="waste-base" element={<WasteReportPage />} />
+                        <Route path="manager-dish" element={<Manager_Dish_Kitchen/>} />
+                    </Route>
+
+                    {/* Admin */}
+                    <Route
+                        path="/admin"
+                        element={
+                            <AdminRoute>
+                                <LayoutAdmin />
+                            </AdminRoute>
+                        }
+                    >
+                        <Route path="dashboard" element={<AdminDashboard />} />
+                    </Route>
+                </Routes>
+
+                {/* Global Widget */}
+                {token && <ChatWidget/>}
+            </Router>
+        </>
     );
 }
 

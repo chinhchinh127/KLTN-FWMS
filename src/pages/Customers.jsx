@@ -1,13 +1,89 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Filter } from "lucide-react";
 
 const Customers = () => {
-    const customerData = [
-        { date: "13/03/2026", quantity: 120, note: "Đặt bàn đồng" },
-        { date: "14/03/2026", quantity: 95, note: "-" },
-        { date: "15/03/2026", quantity: 110, note: "Tiệc sinh nhật" },
-        { date: "16/03/2026", quantity: 80, note: "-" },
-    ];
+    // ===== STATE =====
+    const [summary, setSummary] = useState({
+        current_month_total: 0,
+        previous_month_total: 0,
+        percentage_change: 0,
+    });
+
+    const [customerData, setCustomerData] = useState([]);
+    const [loadingSummary, setLoadingSummary] = useState(true);
+    const [loadingTable, setLoadingTable] = useState(true);
+
+    // ===== CALL API =====
+    useEffect(() => {
+        fetchSummary();
+        fetchCustomers();
+    }, []);
+
+    const formatDate = (row) => {
+        const rawDate =
+            row.operation_date || row.date || row.createdAt || row.day;
+
+        if (!rawDate) return "Không hợp lệ";
+
+        if (!isNaN(Date.parse(rawDate))) {
+            return new Date(rawDate).toLocaleDateString("vi-VN");
+        }
+
+        return "Không hợp lệ";
+    };
+
+    // 👉 API 1: Stats
+    const fetchSummary = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await fetch(
+                "https://wasteless-ai.onrender.com/api/consumption/sum-customer-as-last-month",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            const data = await res.json();
+
+            if (data.success) {
+                setSummary(data.data);
+            }
+        } catch (error) {
+            console.error("Lỗi summary:", error);
+        } finally {
+            setLoadingSummary(false);
+        }
+    };
+    // 👉 API 2: Table
+    const fetchCustomers = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await fetch(
+                "https://wasteless-ai.onrender.com/api/consumption/list-customer-in-month",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            const data = await res.json();
+
+            console.log("DATA TABLE:", data.data); 
+
+            if (data.success) {
+                setCustomerData(data.data || []);
+            }
+        } catch (error) {
+            console.error("Lỗi table:", error);
+        } finally {
+            setLoadingTable(false);
+        }
+    };
 
     return (
         <div className="p-8 max-w-6xl mx-auto">
@@ -36,10 +112,16 @@ const Customers = () => {
                 </p>
                 <div className="flex items-center justify-between">
                     <span className="text-5xl font-bold text-[#141C21]">
-                        450
+                        {loadingSummary ? "..." : summary.current_month_total}
                     </span>
-                    <span className="text-sm text-[#10BC5D] bg-green-50 px-4 py-2 rounded-full font-medium">
-                        +5.2% so với tháng trước
+
+                    <span
+                        className={`text-sm px-4 py-2 rounded-full font-medium ${summary.percentage_change >= 0
+                                ? "text-[#10BC5D] bg-green-50"
+                                : "text-red-500 bg-red-50"
+                            }`}
+                    >
+                        {summary.percentage_change}% so với tháng trước
                     </span>
                 </div>
             </div>
@@ -66,59 +148,61 @@ const Customers = () => {
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
                             <th className="text-left py-4 px-5 text-sm font-bold text-[#3D3D3D]">
-                                NGÀY
+                                Ngày
                             </th>
                             <th className="text-left py-4 px-5 text-sm font-bold text-[#3D3D3D]">
-                                SỐ LƯỢNG KHÁCH
+                                Số Lượng Khách
                             </th>
                             <th className="text-left py-4 px-5 text-sm font-bold text-[#3D3D3D]">
-                                GHI CHÚ
+                                Doanh Thu
                             </th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        {customerData.map((row, index) => (
-                            <tr
-                                key={index}
-                                className="border-b border-gray-100 hover:bg-gray-50"
-                            >
-                                <td className="py-4 px-5 text-sm text-[#141C21]">
-                                    {row.date}
-                                </td>
-                                <td className="py-4 px-5 text-sm text-[#141C21] font-medium">
-                                    {row.quantity}
-                                </td>
-                                <td className="py-4 px-5 text-sm text-[#8B8B8B]">
-                                    {row.note}
+                        {loadingTable ? (
+                            <tr>
+                                <td colSpan="3" className="text-center py-4">
+                                    Đang tải dữ liệu...
                                 </td>
                             </tr>
-                        ))}
+                        ) : customerData.length === 0 ? (
+                            <tr>
+                                <td colSpan="3" className="text-center py-4">
+                                    Không có dữ liệu
+                                </td>
+                            </tr>
+                        ) : (
+                            customerData.map((row, index) => (
+                                <tr
+                                    key={index}
+                                    className="border-b border-gray-100 hover:bg-gray-50"
+                                >
+                                    <td className="py-4 px-5 text-sm text-[#141C21]">
+                                        {formatDate(row)}
+                                    </td>
+
+                                    <td className="py-4 px-5 text-sm text-[#141C21] font-medium">
+                                        {row.quantity ??
+                                            row.customer_count ??
+                                            0}
+                                    </td>
+
+                                    <td className="py-4 px-5 text-sm text-[#141C21]">
+                                        {row.total_revenue || "-"}
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
 
-            {/* Pagination */}
+            {/* Footer */}
             <div className="flex items-center justify-between">
                 <p className="text-sm text-[#8B8B8B]">
-                    Hiển thị 4 trên 150 bản ghi
+                    Hiển thị {customerData.length} bản ghi
                 </p>
-                <div className="flex items-center gap-2">
-                    <button className="px-3 py-1.5 text-sm text-[#8B8B8B] hover:text-[#141C21] hover:bg-gray-100 rounded-lg">
-                        Trước
-                    </button>
-                    <button className="w-8 h-8 bg-[#10BC5D] text-white rounded-lg text-sm">
-                        1
-                    </button>
-                    <button className="w-8 h-8 hover:bg-gray-100 rounded-lg text-sm text-[#3D3D3D]">
-                        2
-                    </button>
-                    <button className="w-8 h-8 hover:bg-gray-100 rounded-lg text-sm text-[#3D3D3D]">
-                        3
-                    </button>
-                    <button className="px-3 py-1.5 text-sm text-[#8B8B8B] hover:text-[#141C21] hover:bg-gray-100 rounded-lg">
-                        Sau
-                    </button>
-                </div>
             </div>
         </div>
     );

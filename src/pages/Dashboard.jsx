@@ -1,4 +1,5 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 const getCurrentTime = () => {
   const now = new Date();
@@ -92,67 +93,92 @@ function AddPeopleForm({ onClose }) {
   );
 }
 
-function UpdatePeopleForm({ onClose }) {
-  const [count, setCount] = useState("");
-  const [updated, setUpdated] = useState(false);
-
-  const handleUpdate = () => {
-    if (!count || isNaN(count) || Number(count) <= 0) return;
-    setUpdated(true);
-    setTimeout(() => setUpdated(false), 2500);
-    setCount("");
-  };
-
-  return (
-    <Modal title="Cập nhật số lượng người ngày hôm nay" onClose={onClose}>
-      <div className="space-y-4" style={{ fontFamily: "'Nunito', sans-serif" }}>
-        <div>
-          <label className="block text-sm font-bold mb-1" style={{ color: "var(--color-text-2)" }}>Thời gian cập nhật</label>
-          <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm cursor-not-allowed" style={{ color: "var(--color-text-3)" }}>
-            <span className="material-symbols-outlined text-sm" style={{ color: "var(--color-primary)" }}>update</span>
-            <span className="font-semibold">{getCurrentDate()} — {getCurrentTime()}</span>
-            <span className="ml-auto text-xs bg-gray-200 px-2 py-0.5 rounded-full" style={{ color: "var(--color-text-3)" }}>Cố định</span>
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-bold mb-1" style={{ color: "var(--color-text-2)" }}>
-            Số lượng người cập nhật <span className="text-red-400">*</span>
-          </label>
-          <input
-            type="number"
-            min="1"
-            value={count}
-            onChange={(e) => setCount(e.target.value)}
-            placeholder="Nhập số lượng người mới..."
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none transition-all"
-            style={{ fontFamily: "'Nunito', sans-serif", color: "var(--color-text-1)" }}
-            onFocus={e => { e.target.style.borderColor = "var(--color-primary)"; e.target.style.boxShadow = "0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent)"; }}
-            onBlur={e => { e.target.style.borderColor = "#e5e7eb"; e.target.style.boxShadow = "none"; }}
-          />
-        </div>
-
-        {updated && (
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold border" style={{ background: "color-mix(in srgb, var(--color-primary) 10%, transparent)", borderColor: "color-mix(in srgb, var(--color-primary) 30%, transparent)", color: "var(--color-primary)" }}>
-            <span className="material-symbols-outlined text-sm">check_circle</span>
-            Cập nhật thành công!
-          </div>
-        )}
-
-        <button
-          onClick={handleUpdate}
-          className="w-full py-3 text-white font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2"
-          style={{ background: "linear-gradient(to right, #0da04f, var(--color-primary))", fontFamily: "'Nunito', sans-serif", boxShadow: "0 4px 14px color-mix(in srgb, var(--color-primary) 30%, transparent)" }}
-        >
-          <span className="material-symbols-outlined text-sm">sync</span>
-          Cập nhật người mới
-        </button>
-      </div>
-    </Modal>
-  );
-}
-
 export default function Dashboard() {
   const [modal, setModal] = useState(null);
+  const token = localStorage.getItem("token");
+
+  const [dataDishes, setDataDishes] = useState(null);
+  const [totalRevenueOneMonth, settotalRevenueOneMonth] = useState(null);
+  const [lowstockingredient, setlowstockingredient] = useState(null);
+  const [Waste_Percentage, setWaste_Percentage] = useState(null);
+  
+  useEffect(() => {
+    fetchDishes();
+    fetchtotalRevenueOneMonth();
+    fetchreportlowstock();
+    fetch_WastePecentage();
+  }, []);
+  const fetchDishes = async () => {
+    if (!token) return;
+
+    try {
+      const res = await axios.get("https://wasteless-ai.onrender.com/api/dashboard/get-sum-dishes",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        },
+      );
+      // console.log(res.data.data);
+      setDataDishes(res.data.data);
+      // console.log(dataDishes);
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchtotalRevenueOneMonth = async () => {
+    try {
+      const res = await axios.get("https://wasteless-ai.onrender.com/api/dashboard/get-sum-revenue",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      settotalRevenueOneMonth(res.data.data);
+      // console.log(res.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchreportlowstock = async () => {
+    try {
+      const res = await axios.get("https://wasteless-ai.onrender.com/api/dashboard/get-low-stock-ingredients",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setlowstockingredient(res.data.data);
+      // console.log(res.data.data);
+    } catch (error) {
+      console.log(error);
+
+    }
+  }
+
+  const fetch_WastePecentage = async () =>{
+    try{
+      const res = await axios.get("https://wasteless-ai.onrender.com/api/dashboard/get-waste-percentage",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      // console.log(res.data.data);
+      setWaste_Percentage(res.data.data);
+    }catch(error){
+      console.log(error);
+    }
+  };
+  const number_waste_percentage = parseFloat(Waste_Percentage);
+  
+  
 
   return (
     <>
@@ -163,7 +189,7 @@ export default function Dashboard() {
         .animate-fadeIn { animation: fadeIn 0.22s cubic-bezier(.4,0,.2,1); }
       `}</style>
 
-      <div className="min-h-screen" style={{ background: "#f6f8f7" }}>
+      <div className="min-h-screen pl-8" style={{ background: "#f6f8f7" }}>
         <main className="p-8 max-w-7xl mx-auto" style={{ fontFamily: "'Nunito', sans-serif" }}>
 
           {/* Header */}
@@ -184,14 +210,6 @@ export default function Dashboard() {
               >
                 <span className="material-symbols-outlined text-sm">person_add</span>
                 Nhập số lượng người ngày hôm nay
-              </button>
-              <button
-                onClick={() => setModal("update")}
-                className="px-4 py-2.5 text-white rounded-xl flex items-center gap-2 font-bold text-sm hover:opacity-90 transition-all"
-                style={{ background: "linear-gradient(to right, var(--color-primary), #0da04f)", fontFamily: "'Nunito', sans-serif", boxShadow: "0 4px 12px color-mix(in srgb, var(--color-primary) 30%, transparent)" }}
-              >
-                <span className="material-symbols-outlined text-sm">sync</span>
-                Cập nhật số lượng ngày hôm nay
               </button>
             </div>
           </div>
@@ -216,9 +234,9 @@ export default function Dashboard() {
               <p className="font-bold text-base mb-4" style={{ color: "var(--color-text-1)", fontFamily: "'Arimo', sans-serif" }}>Báo cáo số lượng món ăn</p>
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { label: "Tổng số món", value: "124", badge: "+3", badgeBg: "color-mix(in srgb, var(--color-primary) 10%, transparent)", badgeColor: "var(--color-primary)" },
-                  { label: "Đang phục vụ", value: "118", badge: "95.2%", badgeBg: "#f3f4f6", badgeColor: "var(--color-text-3)" },
-                  { label: "Chờ duyệt", value: "6", badge: "Cần xử lý", badgeBg: "#fff7ed", badgeColor: "#f97316" },
+                  { label: "Tổng số món", value: dataDishes?.totalDishes || "0", badge: "+3", badgeBg: "color-mix(in srgb, var(--color-primary) 10%, transparent)", badgeColor: "var(--color-primary)" },
+                  { label: "Đang phục vụ", value: dataDishes?.totalServingDishes || "0", badge: "95.2%", badgeBg: "#f3f4f6", badgeColor: "var(--color-text-3)" },
+                  { label: "Chờ duyệt", value: dataDishes?.totalWaitingDishes || "0", badge: "Cần xử lý", badgeBg: "#fff7ed", badgeColor: "#f97316" },
                 ].map((s) => (
                   <div key={s.label} className="bg-white p-6 rounded-xl shadow-sm" style={{ border: "1px solid color-mix(in srgb, var(--color-primary) 10%, transparent)" }}>
                     <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "var(--color-text-3)", fontFamily: "'Nunito', sans-serif" }}>{s.label}</p>
@@ -236,7 +254,7 @@ export default function Dashboard() {
                 <div className="bg-white p-6 rounded-xl shadow-sm h-64 flex flex-col" style={{ border: "1px solid color-mix(in srgb, var(--color-primary) 10%, transparent)" }}>
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <p className="text-2xl font-bold" style={{ color: "var(--color-text-1)", fontFamily: "'Arimo', sans-serif" }}>452,000,000 VND</p>
+                      <p className="text-2xl font-bold" style={{ color: "var(--color-text-1)", fontFamily: "'Arimo', sans-serif" }}>{(totalRevenueOneMonth * 26.335).toLocaleString()} VND</p>
                       <p className="text-sm font-bold flex items-center gap-1 mt-0.5" style={{ color: "var(--color-primary)", fontFamily: "'Nunito', sans-serif" }}>
                         <span className="material-symbols-outlined text-sm">trending_up</span> +12% so với tháng trước
                       </p>
@@ -274,16 +292,18 @@ export default function Dashboard() {
                 <div className="relative w-36 h-36 mx-auto mb-4">
                   <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
                     <circle cx="40" cy="40" r="32" fill="none" stroke="#f0f4f2" strokeWidth="7" />
-                    <circle cx="40" cy="40" r="32" fill="none" stroke="var(--color-primary)" strokeWidth="7"
-                      strokeDasharray="201" strokeDashoffset="159" strokeLinecap="round" />
+                    <circle cx="40" cy="40" r="32" fill="none" stroke={`${number_waste_percentage <= 5 ? "var(--color-primary)" : number_waste_percentage > 5 && number_waste_percentage <= 10 ? "#f97316" : number_waste_percentage > 10 ? "#ef4444" : ""}`} strokeWidth="7"
+                      strokeDasharray="201" strokeDashoffset={201 - (number_waste_percentage*2)} strokeLinecap="round" />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-2xl font-bold" style={{ color: "var(--color-text-1)", fontFamily: "'Arimo', sans-serif" }}>8.5%</span>
-                    <span className="text-xs" style={{ color: "var(--color-text-3)", fontFamily: "'Nunito', sans-serif" }}>Trung bình</span>
+                    <span className="text-2xl font-bold" style={{ color: "var(--color-text-1)", fontFamily: "'Arimo', sans-serif" }}>{Waste_Percentage}</span>
+                    <span className="text-xs" style={{ color: "var(--color-text-3)", fontFamily: "'Nunito', sans-serif" }}>{number_waste_percentage <= 5 ? "Ổn Định" : number_waste_percentage > 5 && number_waste_percentage <= 10 ? "Cảnh báo" : number_waste_percentage > 10 ? "Báo động" : ""}</span>
                   </div>
                 </div>
-                <p className="text-sm" style={{ color: "var(--color-text-2)", fontFamily: "'Nunito', sans-serif" }}>
-                  Thấp hơn <strong>2.1%</strong> so với định mức cho phép
+                {/* style={{ color: "var(--color-text-2)", fontFamily: "'Nunito', sans-serif" }} */}
+                <p className={`text-sm ${number_waste_percentage <= 5 ? "text-[#10BC5D]" : number_waste_percentage > 5 && number_waste_percentage <= 10 ? "text-[#f97316]" : number_waste_percentage > 10 ? "text-[#ef4444]" : ""}`}>
+                  {number_waste_percentage <= 5 ? `Mức lãng phí thực phẩm đang ổn định, chưa có dấu hiệu đáng lo ngại.` : number_waste_percentage > 5 && number_waste_percentage <= 10 ? "Lượng thực phẩm lãng phí đang tăng, cần theo dõi và kiểm soát sớm." : number_waste_percentage > 10 ? `Mức lãng phí thực phẩm cao hơn ${(number_waste_percentage - 10).toFixed(2)}% ,cần hành động ngay để tránh thất thoát nghiêm trọng!` : ""}
+                  
                 </p>
               </div>
 
@@ -329,29 +349,73 @@ export default function Dashboard() {
             <table className="w-full text-left">
               <thead>
                 <tr style={{ background: "rgba(246,248,247,0.6)" }}>
-                  {["Danh mục", "Số lượng thải", "Giá trị thất thoát", "Trạng thái", "Xu hướng"].map((h) => (
-                    <th key={h} className="px-6 py-4 font-bold text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)", fontFamily: "'Nunito', sans-serif" }}>{h}</th>
+                  {["Danh mục", "Số lượng", "Tồn tối thiểu", "Đơn vị", "Trạng thái", "Xu hướng"].map((h) => (
+                    <th
+                      key={h}
+                      className="px-6 py-4 font-bold text-xs uppercase tracking-wider"
+                      style={{ color: "var(--color-text-3)", fontFamily: "'Nunito', sans-serif" }}
+                    >
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
+
               <tbody>
-                {[
-                  { cat: "Rau củ quả", qty: "24.5 kg", val: "1,240,000 đ", status: "Tốt", statusBg: "color-mix(in srgb, var(--color-primary) 10%, transparent)", statusColor: "var(--color-primary)", trend: "trending_down", trendColor: "var(--color-primary)" },
-                  { cat: "Thịt & Hải sản", qty: "12.2 kg", val: "3,850,000 đ", status: "Cảnh báo", statusBg: "#fff7ed", statusColor: "#ea580c", trend: "trending_up", trendColor: "#f97316" },
-                  { cat: "Đồ khô & Gia vị", qty: "2.8 kg", val: "420,000 đ", status: "Tốt", statusBg: "color-mix(in srgb, var(--color-primary) 10%, transparent)", statusColor: "var(--color-primary)", trend: "trending_flat", trendColor: "var(--color-text-3)" },
-                ].map((row, idx) => (
-                  <tr key={row.cat} className="transition-colors hover:bg-gray-50" style={{ borderTop: "1px solid #f6f8f7" }}>
-                    <td className="px-6 py-4 text-sm font-bold" style={{ color: "var(--color-text-2)", fontFamily: "'Nunito', sans-serif" }}>{row.cat}</td>
-                    <td className="px-6 py-4 text-sm" style={{ color: "var(--color-text-2)", fontFamily: "'Nunito', sans-serif" }}>{row.qty}</td>
-                    <td className="px-6 py-4 text-sm" style={{ color: "var(--color-text-2)", fontFamily: "'Nunito', sans-serif" }}>{row.val}</td>
-                    <td className="px-6 py-4">
-                      <span className="px-2 py-1 rounded text-xs font-bold" style={{ background: row.statusBg, color: row.statusColor, fontFamily: "'Nunito', sans-serif" }}>{row.status}</span>
-                    </td>
-                    <td className="px-6 py-4" style={{ color: row.trendColor }}>
-                      <span className="material-symbols-outlined align-middle text-sm">{row.trend}</span>
-                    </td>
-                  </tr>
-                ))}
+                {lowstockingredient?.map((value, index) => {
+                  const isLow = value.current_stock < value.minimum_stock;
+
+                  return (
+                    <tr
+                      key={value.id || index}
+                      className="transition-colors hover:bg-gray-50"
+                      style={{ borderTop: "1px solid #f6f8f7" }}
+                    >
+                      {/* Tên */}
+                      <td className="px-6 py-4 text-sm font-bold">
+                        {value.name}
+                      </td>
+
+                      {/* Current stock */}
+                      <td className="px-6 py-4 text-sm">
+                        {value.current_stock?.toLocaleString("vi-VN")}
+                      </td>
+
+                      {/* Minimum */}
+                      <td className="px-6 py-4 text-sm">
+                        {value.minimum_stock?.toLocaleString("vi-VN")}
+                      </td>
+
+                      {/* Unit */}
+                      <td className="px-6 py-4 text-sm">
+                        {value.unit?.toLocaleString("vi-VN")}
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-6 py-4">
+                        <span
+                          className="px-2 py-1 rounded text-xs font-bold"
+                          style={{
+                            background: isLow ? "#fee2e2" : "#dcfce7",
+                            color: isLow ? "#dc2626" : "#16a34a",
+                          }}
+                        >
+                          {isLow ? "Thiếu hàng" : "Ổn định"}
+                        </span>
+                      </td>
+
+                      {/* Trend */}
+                      <td
+                        className="px-6 py-4"
+                        style={{ color: isLow ? "#dc2626" : "#16a34a" }}
+                      >
+                        <span className="material-symbols-outlined align-middle text-sm">
+                          {isLow ? "trending_down" : "trending_up"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -53,7 +53,7 @@ export const kitchenDishAPI = {
         console.log("Data stringify:", JSON.stringify(data));
 
         try {
-            const response = await kitchenApi.post(
+            const response = await kitchenApi.post( 
                 `/kitchen/create-dishes-daily/${brandId}`,
                 data,
             );
