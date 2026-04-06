@@ -372,11 +372,11 @@ export const Row_Account_Staff = () => {
                                     <span className="text-sm text-slate-700 font-medium truncate">{selectedStaff.address}</span>
                                 </div>
                             </div>
-                            <div className="mt-8">
+                            {/* <div className="mt-8">
                                 <button className="w-full py-3 border-2 border-slate-100 hover:bg-slate-50 text-slate-600 font-bold rounded-xl transition-colors">
                                     Xem doanh thu
                                 </button>
-                            </div>
+                            </div> */}
 
                             <button onClick={() => setSelectedStaff(null)} className='absolute top-0 right-[-16px] group-hover:opacity-100 opacity-0 transition-all duration-300 group-hover:translate-y-[-14.5px]  rounded-[50%]'><i class="fa-solid fa-circle-xmark text-red-500 text-3xl"></i></button>
                         </div>

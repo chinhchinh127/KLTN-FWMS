@@ -75,6 +75,7 @@ const Manager_Account_Staff = () => {
             );
             console.log(res.data);
             toast.success("Tạo tài khoản thành công!");
+            window.location.reload();
             setopenform_setkitchen(false);
         } catch (error) {
             console.log(error.response?.data);
